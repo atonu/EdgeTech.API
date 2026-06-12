@@ -1,0 +1,6 @@
+@EdgeTech.API_HostAddress = http://localhost:5217
+
+GET {{EdgeTech.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

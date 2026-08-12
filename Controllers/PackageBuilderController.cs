@@ -2,9 +2,10 @@ using System.Security.Claims;
 using EdgeTech.API.Data;
 using EdgeTech.API.Models;
 using EdgeTech.API.Models.DTOs;
+using EdgeTech.API.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using MongoDB.Driver;
 
 namespace EdgeTech.API.Controllers;
 
@@ -12,8 +13,15 @@ namespace EdgeTech.API.Controllers;
 [Route("api/package-builder")]
 public class PackageBuilderController : ControllerBase
 {
-    private readonly AppDbContext _db;
-    public PackageBuilderController(AppDbContext db) => _db = db;
+    private readonly MongoDbContext _db;
+    private readonly IIdGeneratorService _ids;
+
+    public PackageBuilderController(MongoDbContext db, IIdGeneratorService ids)
+    {
+        _db = db;
+        _ids = ids;
+    }
+
     private string? UserId => User.FindFirstValue(ClaimTypes.NameIdentifier);
 
     private static readonly List<PackageSlotDefinition> Slots =
@@ -33,24 +41,40 @@ public class PackageBuilderController : ControllerBase
     [HttpGet("slots")]
     public async Task<IActionResult> GetSlots()
     {
+        var categories = await _db.Categories.Find(c => c.IsActive).ToListAsync();
+        var brands = await _db.Brands.Find(b => b.IsActive).ToListAsync();
+        var products = await _db.Products.Find(p => p.IsActive).ToListAsync();
+
+        var categoryBySlug = categories.ToDictionary(c => c.Slug, c => c.Id);
+        var categoryMap = categories.ToDictionary(c => c.Id);
+        var brandMap = brands.ToDictionary(b => b.Id);
+
         var result = new List<object>();
         foreach (var slot in Slots)
         {
-            var products = await _db.Products
-                .Include(p => p.Brand)
-                .Include(p => p.Images)
-                .Where(p => p.IsActive && p.Category.Slug == slot.CategorySlug)
-                .Select(p => new ProductListDto(
-                    p.Id, p.Name, p.Slug, p.Price, p.DiscountPrice,
-                    p.Images.FirstOrDefault(i => i.IsPrimary) != null
-                        ? p.Images.FirstOrDefault(i => i.IsPrimary)!.ImageUrl
-                        : p.Images.FirstOrDefault() != null ? p.Images.First().ImageUrl : null,
-                    p.Stock, p.IsFeatured, p.Category.Name, p.Brand.Name
-                ))
-                .ToListAsync();
+            var slotProducts = new List<ProductListDto>();
+            if (categoryBySlug.TryGetValue(slot.CategorySlug, out var categoryId))
+            {
+                slotProducts = products
+                    .Where(p => p.CategoryId == categoryId)
+                    .Select(p => new ProductListDto(
+                        p.Id,
+                        p.Name,
+                        p.Slug,
+                        p.Price,
+                        p.DiscountPrice,
+                        p.Images.FirstOrDefault(i => i.IsPrimary)?.ImageUrl ?? p.Images.FirstOrDefault()?.ImageUrl,
+                        p.Stock,
+                        p.IsFeatured,
+                        categoryMap.GetValueOrDefault(p.CategoryId)?.Name ?? "Unknown",
+                        brandMap.GetValueOrDefault(p.BrandId)?.Name ?? "Unknown"
+                    ))
+                    .ToList();
+            }
 
-            result.Add(new { slot, products });
+            result.Add(new { slot, products = slotProducts });
         }
+
         return Ok(result);
     }
 
@@ -58,63 +82,147 @@ public class PackageBuilderController : ControllerBase
     [Authorize]
     public async Task<IActionResult> SaveBuild([FromBody] SavePackageRequest req)
     {
-        var build = new PackageBuild { UserId = UserId, Name = req.Name };
+        if (UserId == null)
+            return Unauthorized();
+
+        var productIds = req.Components.Select(c => c.ProductId).Distinct().ToList();
+        var products = await _db.Products.Find(p => productIds.Contains(p.Id) && p.IsActive).ToListAsync();
+        var productMap = products.ToDictionary(p => p.Id);
+
+        var buildId = await _ids.NextAsync("packageBuilds");
+        var build = new PackageBuild
+        {
+            Id = buildId,
+            UserId = UserId,
+            Name = req.Name,
+            TotalPrice = 0,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow,
+            Components = []
+        };
+
         foreach (var comp in req.Components)
         {
-            var product = await _db.Products.FindAsync(comp.ProductId);
-            if (product == null) continue;
-            build.Components.Add(new PackageComponent { SlotKey = comp.SlotKey, ProductId = comp.ProductId, Quantity = comp.Quantity });
+            if (!productMap.TryGetValue(comp.ProductId, out var product))
+                continue;
+
+            var component = new PackageComponent
+            {
+                Id = await _ids.NextAsync("packageComponents"),
+                PackageBuildId = buildId,
+                SlotKey = comp.SlotKey,
+                ProductId = comp.ProductId,
+                Quantity = comp.Quantity
+            };
+
+            build.Components.Add(component);
             build.TotalPrice += (product.DiscountPrice ?? product.Price) * comp.Quantity;
         }
-        _db.PackageBuilds.Add(build);
-        await _db.SaveChangesAsync();
+
+        await _db.PackageBuilds.InsertOneAsync(build);
         return Ok(new { id = build.Id });
     }
 
     [HttpGet("{id}")]
     public async Task<IActionResult> GetBuild(int id)
     {
-        var build = await _db.PackageBuilds
-            .Include(b => b.Components).ThenInclude(c => c.Product).ThenInclude(p => p.Images)
-            .FirstOrDefaultAsync(b => b.Id == id);
+        var build = await _db.PackageBuilds.Find(b => b.Id == id).FirstOrDefaultAsync();
         if (build == null) return NotFound();
-        return Ok(MapBuildDto(build));
+        return Ok(await MapBuildDto(build));
     }
 
     [HttpGet("my-builds")]
     [Authorize]
     public async Task<IActionResult> GetMyBuilds()
     {
-        var builds = await _db.PackageBuilds
-            .Include(b => b.Components).ThenInclude(c => c.Product).ThenInclude(p => p.Images)
-            .Where(b => b.UserId == UserId)
-            .OrderByDescending(b => b.CreatedAt)
+        if (UserId == null) return Unauthorized();
+
+        var builds = await _db.PackageBuilds.Find(b => b.UserId == UserId)
+            .SortByDescending(b => b.CreatedAt)
             .ToListAsync();
-        return Ok(builds.Select(MapBuildDto));
+
+        var dtos = new List<PackageBuildDto>();
+        foreach (var build in builds)
+            dtos.Add(await MapBuildDto(build));
+
+        return Ok(dtos);
     }
 
     [HttpPost("{id}/add-to-cart")]
     [Authorize]
     public async Task<IActionResult> AddBuildToCart(int id)
     {
-        var build = await _db.PackageBuilds.Include(b => b.Components).FirstOrDefaultAsync(b => b.Id == id);
+        if (UserId == null)
+            return Unauthorized();
+
+        var build = await _db.PackageBuilds.Find(b => b.Id == id).FirstOrDefaultAsync();
         if (build == null) return NotFound();
+
+        var productIds = build.Components.Select(c => c.ProductId).Distinct().ToList();
+        var products = await _db.Products.Find(p => productIds.Contains(p.Id)).ToListAsync();
+        var productMap = products.ToDictionary(p => p.Id);
+
         foreach (var comp in build.Components)
         {
-            var existing = await _db.CartItems.FirstOrDefaultAsync(ci => ci.UserId == UserId && ci.ProductId == comp.ProductId);
-            if (existing != null) existing.Quantity += comp.Quantity;
-            else _db.CartItems.Add(new CartItem { UserId = UserId!, ProductId = comp.ProductId, Quantity = comp.Quantity });
+            if (!productMap.TryGetValue(comp.ProductId, out var product) || !product.IsActive)
+                return BadRequest(new { message = $"Product ID {comp.ProductId} is inactive or missing" });
+
+            var existing = await _db.CartItems.Find(ci => ci.UserId == UserId && ci.ProductId == comp.ProductId).FirstOrDefaultAsync();
+            var nextQty = (existing?.Quantity ?? 0) + comp.Quantity;
+            if (nextQty > product.Stock)
+            {
+                return BadRequest(new
+                {
+                    message = $"Product '{product.Name}' exceeds available stock",
+                    requested = nextQty,
+                    available = product.Stock
+                });
+            }
+
+            if (existing != null)
+            {
+                await _db.CartItems.UpdateOneAsync(ci => ci.Id == existing.Id,
+                    Builders<CartItem>.Update.Set(ci => ci.Quantity, nextQty));
+            }
+            else
+            {
+                await _db.CartItems.InsertOneAsync(new CartItem
+                {
+                    Id = await _ids.NextAsync("cartItems"),
+                    UserId = UserId,
+                    ProductId = comp.ProductId,
+                    Quantity = comp.Quantity,
+                    AddedAt = DateTime.UtcNow
+                });
+            }
         }
-        await _db.SaveChangesAsync();
+
         return Ok();
     }
 
-    private static PackageBuildDto MapBuildDto(PackageBuild b) => new(
-        b.Id, b.Name, b.TotalPrice, b.CreatedAt,
-        b.Components.Select(c => new PackageComponentDto(
-            c.SlotKey, c.ProductId, c.Product.Name,
-            c.Product.Images.FirstOrDefault(i => i.IsPrimary)?.ImageUrl ?? c.Product.Images.FirstOrDefault()?.ImageUrl,
-            c.Product.DiscountPrice ?? c.Product.Price, c.Quantity
-        )).ToList()
-    );
+    private async Task<PackageBuildDto> MapBuildDto(PackageBuild b)
+    {
+        var productIds = b.Components.Select(c => c.ProductId).Distinct().ToList();
+        var products = await _db.Products.Find(p => productIds.Contains(p.Id)).ToListAsync();
+        var productMap = products.ToDictionary(p => p.Id);
+
+        return new PackageBuildDto(
+            b.Id,
+            b.Name,
+            b.TotalPrice,
+            b.CreatedAt,
+            b.Components.Select(c =>
+            {
+                var product = productMap.GetValueOrDefault(c.ProductId);
+                return new PackageComponentDto(
+                    c.SlotKey,
+                    c.ProductId,
+                    product?.Name ?? "Unknown Product",
+                    product?.Images.FirstOrDefault(i => i.IsPrimary)?.ImageUrl ?? product?.Images.FirstOrDefault()?.ImageUrl,
+                    product?.DiscountPrice ?? product?.Price ?? 0,
+                    c.Quantity
+                );
+            }).ToList()
+        );
+    }
 }

@@ -1,30 +1,15 @@
 using System.Text;
+using System.Text.Json.Serialization;
 using EdgeTech.API.Data;
-using EdgeTech.API.Models;
 using EdgeTech.API.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Database
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-
-// Identity
-builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
-{
-    options.Password.RequireDigit = true;
-    options.Password.RequireLowercase = true;
-    options.Password.RequireUppercase = false;
-    options.Password.RequireNonAlphanumeric = false;
-    options.Password.RequiredLength = 8;
-})
-.AddEntityFrameworkStores<AppDbContext>()
-.AddDefaultTokenProviders();
+// Mongo
+builder.Services.AddSingleton<MongoDbContext>();
 
 // JWT
 var jwtSecret = builder.Configuration["Jwt:Secret"] ?? "EdgeTechSuperSecretKeyMustBe32CharactersLong!";
@@ -52,6 +37,7 @@ builder.Services.AddAuthorization();
 // Services
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<IBlobStorageService, BlobStorageService>();
+builder.Services.AddScoped<IIdGeneratorService, IdGeneratorService>();
 
 // CORS
 builder.Services.AddCors(options =>
@@ -65,15 +51,34 @@ builder.Services.AddCors(options =>
         .AllowCredentials());
 });
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
+    });
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new OpenApiInfo { Title = "EdgeTech API", Version = "v1" });
+    c.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "EdgeTech API",
+        Version = "v1",
+        Description = "REST API for EdgeTech ecommerce workflows: auth, catalog, cart, orders, package builder, and admin operations."
+    });
+    c.SupportNonNullableReferenceTypes();
+    c.UseInlineDefinitionsForEnums();
+
+    var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+    if (File.Exists(xmlPath))
+    {
+        c.IncludeXmlComments(xmlPath, includeControllerXmlComments: true);
+    }
+
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         In = ParameterLocation.Header,
-        Description = "Enter JWT token",
+        Description = "JWT Authorization header using the Bearer scheme. Example: 'Bearer {token}'",
         Name = "Authorization",
         Type = SecuritySchemeType.Http,
         BearerFormat = "JWT",
@@ -90,12 +95,11 @@ builder.Services.AddSwaggerGen(c =>
 
 var app = builder.Build();
 
-// Migrate & seed on startup
+// Initialize Mongo collections/indexes/seed on startup.
 using (var scope = app.Services.CreateScope())
 {
-    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    await db.Database.MigrateAsync();
-    await DbSeeder.SeedAsync(scope.ServiceProvider);
+    var db = scope.ServiceProvider.GetRequiredService<MongoDbContext>();
+    await MongoDbInitializer.InitializeAsync(db);
 }
 
 app.UseSwagger();

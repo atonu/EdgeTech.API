@@ -4,9 +4,8 @@ using EdgeTech.API.Models;
 using EdgeTech.API.Models.DTOs;
 using EdgeTech.API.Services;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using MongoDB.Driver;
 
 namespace EdgeTech.API.Controllers;
 
@@ -16,47 +15,82 @@ namespace EdgeTech.API.Controllers;
 [Authorize]
 public class RecentlyViewedController : ControllerBase
 {
-    private readonly AppDbContext _db;
-    public RecentlyViewedController(AppDbContext db) => _db = db;
+    private readonly MongoDbContext _db;
+    private readonly IIdGeneratorService _ids;
+    public RecentlyViewedController(MongoDbContext db, IIdGeneratorService ids)
+    {
+        _db = db;
+        _ids = ids;
+    }
     private string UserId => User.FindFirstValue(ClaimTypes.NameIdentifier)!;
 
     [HttpPost("{productId}")]
     public async Task<IActionResult> Track(int productId)
     {
-        var product = await _db.Products.FindAsync(productId);
+        var product = await _db.Products.Find(p => p.Id == productId).FirstOrDefaultAsync();
         if (product == null) return NotFound();
 
-        var existing = await _db.RecentlyViewed.FirstOrDefaultAsync(r => r.UserId == UserId && r.ProductId == productId);
-        if (existing != null) { existing.ViewedAt = DateTime.UtcNow; }
-        else { _db.RecentlyViewed.Add(new RecentlyViewed { UserId = UserId, ProductId = productId }); }
+        var existing = await _db.RecentlyViewed.Find(r => r.UserId == UserId && r.ProductId == productId).FirstOrDefaultAsync();
+        if (existing != null)
+        {
+            var update = Builders<RecentlyViewed>.Update.Set(r => r.ViewedAt, DateTime.UtcNow);
+            await _db.RecentlyViewed.UpdateOneAsync(r => r.Id == existing.Id, update);
+        }
+        else
+        {
+            var nextId = await _ids.NextAsync("recentlyViewed");
+            await _db.RecentlyViewed.InsertOneAsync(new RecentlyViewed { Id = nextId, UserId = UserId, ProductId = productId });
+        }
 
         // Keep only last 10
-        var old = await _db.RecentlyViewed.Where(r => r.UserId == UserId)
-            .OrderByDescending(r => r.ViewedAt).Skip(10).ToListAsync();
-        _db.RecentlyViewed.RemoveRange(old);
-        await _db.SaveChangesAsync();
+        var keepIds = await _db.RecentlyViewed.Find(r => r.UserId == UserId)
+            .SortByDescending(r => r.ViewedAt)
+            .Limit(10)
+            .Project(r => r.Id)
+            .ToListAsync();
+        await _db.RecentlyViewed.DeleteManyAsync(r => r.UserId == UserId && !keepIds.Contains(r.Id));
+
         return Ok();
     }
 
     [HttpGet]
     public async Task<IActionResult> GetRecent()
     {
-        var items = await _db.RecentlyViewed
-            .Include(r => r.Product).ThenInclude(p => p.Images)
-            .Include(r => r.Product).ThenInclude(p => p.Category)
-            .Include(r => r.Product).ThenInclude(p => p.Brand)
-            .Where(r => r.UserId == UserId)
-            .OrderByDescending(r => r.ViewedAt)
-            .Take(6)
+        var items = await _db.RecentlyViewed.Find(r => r.UserId == UserId)
+            .SortByDescending(r => r.ViewedAt)
+            .Limit(6)
             .ToListAsync();
 
-        return Ok(items.Select(r => new ProductListDto(
-            r.Product.Id, r.Product.Name, r.Product.Slug,
-            r.Product.Price, r.Product.DiscountPrice,
-            r.Product.Images.FirstOrDefault(i => i.IsPrimary)?.ImageUrl ?? r.Product.Images.FirstOrDefault()?.ImageUrl,
-            r.Product.Stock, r.Product.IsFeatured,
-            r.Product.Category.Name, r.Product.Brand.Name
-        )));
+        var productIds = items.Select(i => i.ProductId).Distinct().ToList();
+        var products = await _db.Products.Find(p => productIds.Contains(p.Id)).ToListAsync();
+        var categories = await _db.Categories.Find(c => true).ToListAsync();
+        var brands = await _db.Brands.Find(b => true).ToListAsync();
+
+        var productMap = products.ToDictionary(p => p.Id);
+        var categoryMap = categories.ToDictionary(c => c.Id);
+        var brandMap = brands.ToDictionary(b => b.Id);
+
+        var dtos = items
+            .Where(r => productMap.ContainsKey(r.ProductId))
+            .Select(r =>
+            {
+                var product = productMap[r.ProductId];
+                return new ProductListDto(
+                    product.Id,
+                    product.Name,
+                    product.Slug,
+                    product.Price,
+                    product.DiscountPrice,
+                    product.Images.FirstOrDefault(i => i.IsPrimary)?.ImageUrl ?? product.Images.FirstOrDefault()?.ImageUrl,
+                    product.Stock,
+                    product.IsFeatured,
+                    categoryMap.GetValueOrDefault(product.CategoryId)?.Name ?? "Unknown",
+                    brandMap.GetValueOrDefault(product.BrandId)?.Name ?? "Unknown"
+                );
+            })
+            .ToList();
+
+        return Ok(dtos);
     }
 }
 
@@ -66,53 +100,55 @@ public class RecentlyViewedController : ControllerBase
 [Authorize(Roles = "Admin")]
 public class AdminUsersController : ControllerBase
 {
-    private readonly UserManager<ApplicationUser> _userManager;
-    public AdminUsersController(UserManager<ApplicationUser> um) => _userManager = um;
+    private readonly MongoDbContext _db;
+    public AdminUsersController(MongoDbContext db) => _db = db;
 
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
-        var users = _userManager.Users.ToList();
-        var result = new List<object>();
-        foreach (var u in users)
-        {
-            var roles = await _userManager.GetRolesAsync(u);
-            result.Add(new { u.Id, u.Email, u.FirstName, u.LastName, Role = roles.FirstOrDefault() ?? "User", u.CreatedAt });
-        }
+        var users = await _db.Users.Find(_ => true).ToListAsync();
+        var result = users.Select(u => new { u.Id, u.Email, u.FirstName, u.LastName, Role = u.Role, u.CreatedAt });
         return Ok(result);
     }
 
     [HttpPost]
     public async Task<IActionResult> CreateUser([FromBody] CreateUserRequest req)
     {
+        var existing = await _db.Users.Find(u => u.Email == req.Email.ToLowerInvariant()).FirstOrDefaultAsync();
+        if (existing != null) return BadRequest(new { errors = new[] { "Email is already in use" } });
+
         var user = new ApplicationUser
         {
-            UserName = req.Email, Email = req.Email,
-            FirstName = req.FirstName, LastName = req.LastName, EmailConfirmed = true
+            Id = Guid.NewGuid().ToString("N"),
+            UserName = req.Email.ToLowerInvariant(),
+            Email = req.Email.ToLowerInvariant(),
+            FirstName = req.FirstName,
+            LastName = req.LastName,
+            Role = req.Role,
+            EmailConfirmed = true
         };
-        var result = await _userManager.CreateAsync(user, req.Password);
-        if (!result.Succeeded) return BadRequest(new { errors = result.Errors.Select(e => e.Description) });
-        await _userManager.AddToRoleAsync(user, req.Role);
+        var hasher = new Microsoft.AspNetCore.Identity.PasswordHasher<ApplicationUser>();
+        user.PasswordHash = hasher.HashPassword(user, req.Password);
+        await _db.Users.InsertOneAsync(user);
         return Ok(new { user.Id, user.Email });
     }
 
     [HttpPut("{id}/role")]
     public async Task<IActionResult> ChangeRole(string id, [FromBody] ChangeRoleRequest req)
     {
-        var user = await _userManager.FindByIdAsync(id);
+        var user = await _db.Users.Find(u => u.Id == id).FirstOrDefaultAsync();
         if (user == null) return NotFound();
-        var currentRoles = await _userManager.GetRolesAsync(user);
-        await _userManager.RemoveFromRolesAsync(user, currentRoles);
-        await _userManager.AddToRoleAsync(user, req.Role);
+
+        await _db.Users.UpdateOneAsync(u => u.Id == id, Builders<ApplicationUser>.Update.Set(u => u.Role, req.Role));
         return Ok();
     }
 
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteUser(string id)
     {
-        var user = await _userManager.FindByIdAsync(id);
+        var user = await _db.Users.Find(u => u.Id == id).FirstOrDefaultAsync();
         if (user == null) return NotFound();
-        await _userManager.DeleteAsync(user);
+        await _db.Users.DeleteOneAsync(u => u.Id == id);
         return NoContent();
     }
 }

@@ -44,8 +44,8 @@ public record ToggleFeaturedRequest(bool IsFeatured);
 
 // Category DTOs
 public record CategoryDto(int Id, string Name, string Slug, string? Description, string? ImageUrl, int DisplayOrder, bool IsActive, int? ParentCategoryId, List<CategoryDto>? SubCategories);
-public record CreateCategoryRequest(string Name, string? Description, string? ImageUrl, int DisplayOrder, int? ParentCategoryId);
-public record UpdateCategoryRequest(string Name, string? Description, string? ImageUrl, int DisplayOrder, bool IsActive, int? ParentCategoryId);
+public record CreateCategoryRequest(string Name, bool IsActive);
+public record UpdateCategoryRequest(string Name, bool IsActive);
 
 // Brand DTOs
 public record BrandDto(int Id, string Name, string Slug, string? LogoUrl, string? Description, bool IsActive);

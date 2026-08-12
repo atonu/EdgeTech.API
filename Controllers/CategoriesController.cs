@@ -22,10 +22,12 @@ public class CategoriesController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetAll()
+    public async Task<IActionResult> GetAll([FromQuery] bool includeInactive = false)
     {
-        var categories = await _db.Categories.Find(c => c.IsActive).SortBy(c => c.DisplayOrder).ToListAsync();
-        var roots = categories.Where(c => c.ParentCategoryId == null).ToList();
+        var categories = includeInactive
+            ? await _db.Categories.Find(_ => true).SortBy(c => c.DisplayOrder).ToListAsync()
+            : await _db.Categories.Find(c => c.IsActive).SortBy(c => c.DisplayOrder).ToListAsync();
+        var roots = categories.Where(c => c.ParentCategoryId == null || c.ParentCategoryId == 0).ToList();
         return Ok(roots.Select(c => MapToDto(c, categories)).ToList());
     }
 
@@ -51,11 +53,11 @@ public class CategoriesController : ControllerBase
             Id = await _ids.NextAsync("categories"),
             Name = req.Name,
             Slug = slug,
-            Description = req.Description,
-            ImageUrl = req.ImageUrl,
-            DisplayOrder = req.DisplayOrder,
-            ParentCategoryId = req.ParentCategoryId,
-            IsActive = true
+            Description = null,
+            ImageUrl = null,
+            DisplayOrder = 0,
+            ParentCategoryId = null,
+            IsActive = req.IsActive
         };
 
         await _db.Categories.InsertOneAsync(cat);
@@ -66,13 +68,19 @@ public class CategoriesController : ControllerBase
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Update(int id, [FromBody] UpdateCategoryRequest req)
     {
+        var slug = req.Name.ToLower().Replace(" ", "-").Replace("&", "and");
+        var duplicateSlug = await _db.Categories.Find(c => c.Id != id && c.Slug == slug).AnyAsync();
+        if (duplicateSlug)
+            slug = $"{slug}-{Guid.NewGuid().ToString()[..4]}";
+
         var update = Builders<Category>.Update
             .Set(c => c.Name, req.Name)
-            .Set(c => c.Description, req.Description)
-            .Set(c => c.ImageUrl, req.ImageUrl)
-            .Set(c => c.DisplayOrder, req.DisplayOrder)
+            .Set(c => c.Slug, slug)
             .Set(c => c.IsActive, req.IsActive)
-            .Set(c => c.ParentCategoryId, req.ParentCategoryId);
+            .Set(c => c.Description, (string?)null)
+            .Set(c => c.ImageUrl, (string?)null)
+            .Set(c => c.DisplayOrder, 0)
+            .Set(c => c.ParentCategoryId, (int?)null);
 
         var result = await _db.Categories.UpdateOneAsync(c => c.Id == id, update);
         if (result.MatchedCount == 0) return NotFound();
@@ -118,9 +126,11 @@ public class BrandsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetAll()
+    public async Task<IActionResult> GetAll([FromQuery] bool includeInactive = false)
     {
-        var brands = await _db.Brands.Find(b => b.IsActive).SortBy(b => b.Name).ToListAsync();
+        var brands = includeInactive
+            ? await _db.Brands.Find(_ => true).SortBy(b => b.Name).ToListAsync()
+            : await _db.Brands.Find(b => b.IsActive).SortBy(b => b.Name).ToListAsync();
         return Ok(brands.Select(b => new BrandDto(b.Id, b.Name, b.Slug, b.LogoUrl, b.Description, b.IsActive)));
     }
 

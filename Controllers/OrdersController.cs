@@ -209,8 +209,16 @@ public class OrdersController : ControllerBase
 
         return orderList.Select(o =>
         {
-            var address = JsonSerializer.Deserialize<ShippingAddressDto>(o.ShippingAddress) ??
-                new ShippingAddressDto("", "", "", "", "", "", "");
+            ShippingAddressDto address;
+            try
+            {
+                address = JsonSerializer.Deserialize<ShippingAddressDto>(o.ShippingAddress) ??
+                    new ShippingAddressDto("", "", "", "", "", "", "");
+            }
+            catch
+            {
+                address = new ShippingAddressDto("", "", "", "", "", "", "");
+            }
 
             return new OrderDto(
                 o.Id,

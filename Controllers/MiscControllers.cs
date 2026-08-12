@@ -114,6 +114,11 @@ public class AdminUsersController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> CreateUser([FromBody] CreateUserRequest req)
     {
+        var allowedRoles = new[] { "User", "Admin" };
+        if (!allowedRoles.Contains(req.Role, StringComparer.OrdinalIgnoreCase))
+            return BadRequest(new { errors = new[] { "Invalid role" } });
+
+        var role = req.Role.Equals("Admin", StringComparison.OrdinalIgnoreCase) ? "Admin" : "User";
         var existing = await _db.Users.Find(u => u.Email == req.Email.ToLowerInvariant()).FirstOrDefaultAsync();
         if (existing != null) return BadRequest(new { errors = new[] { "Email is already in use" } });
 
@@ -124,7 +129,7 @@ public class AdminUsersController : ControllerBase
             Email = req.Email.ToLowerInvariant(),
             FirstName = req.FirstName,
             LastName = req.LastName,
-            Role = req.Role,
+            Role = role,
             EmailConfirmed = true
         };
         var hasher = new Microsoft.AspNetCore.Identity.PasswordHasher<ApplicationUser>();

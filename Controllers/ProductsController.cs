@@ -133,6 +133,12 @@ public class ProductsController : ControllerBase
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Create([FromBody] CreateProductRequest req)
     {
+        var categoryExists = await _db.Categories.Find(c => c.Id == req.CategoryId && c.IsActive).AnyAsync();
+        if (!categoryExists) return BadRequest(new { message = "A valid category is required for every product" });
+
+        var brandExists = await _db.Brands.Find(b => b.Id == req.BrandId && b.IsActive).AnyAsync();
+        if (!brandExists) return BadRequest(new { message = "A valid brand is required for every product" });
+
         var slug = GenerateSlug(req.Name);
         if (await _db.Products.Find(p => p.Slug == slug).AnyAsync())
             slug = $"{slug}-{Guid.NewGuid().ToString()[..6]}";
@@ -182,6 +188,12 @@ public class ProductsController : ControllerBase
     {
         var product = await _db.Products.Find(p => p.Id == id).FirstOrDefaultAsync();
         if (product == null) return NotFound();
+
+        var categoryExists = await _db.Categories.Find(c => c.Id == req.CategoryId && c.IsActive).AnyAsync();
+        if (!categoryExists) return BadRequest(new { message = "A valid category is required for every product" });
+
+        var brandExists = await _db.Brands.Find(b => b.Id == req.BrandId && b.IsActive).AnyAsync();
+        if (!brandExists) return BadRequest(new { message = "A valid brand is required for every product" });
 
         product.Name = req.Name;
         product.Description = req.Description;

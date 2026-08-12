@@ -6,7 +6,11 @@ public class Order
 {
     public int Id { get; set; }
     public string? UserId { get; set; }
-    public OrderStatus Status { get; set; } = OrderStatus.Pending;
+    public OrderStatus Status { get; set; } = OrderStatus.Placed;
+    public string CustomerName { get; set; } = string.Empty;
+    public string CustomerEmail { get; set; } = string.Empty;
+    public string CustomerPhone { get; set; } = string.Empty;
+    public bool IsGuestOrder { get; set; }
     public decimal TotalAmount { get; set; }
     public string ShippingAddress { get; set; } = string.Empty; // JSON
     public string? Notes { get; set; }
@@ -22,9 +26,9 @@ public class Order
 
 public enum OrderStatus
 {
-    Pending,
-    Processing,
-    Shipped,
-    Delivered,
+    Placed,
+    Verified,
+    InProgress,
+    Done,
     Cancelled
 }

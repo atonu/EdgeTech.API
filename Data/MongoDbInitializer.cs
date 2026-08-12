@@ -37,6 +37,12 @@ public static class MongoDbInitializer
             new CreateIndexModel<Product>(Builders<Product>.IndexKeys.Ascending(p => p.IsFeatured))
         ]);
 
+        await db.Services.Indexes.CreateOneAsync(
+            new CreateIndexModel<ServiceItem>(Builders<ServiceItem>.IndexKeys.Ascending(s => s.Name), new CreateIndexOptions { Unique = true }));
+
+        await db.ProductGroups.Indexes.CreateOneAsync(
+            new CreateIndexModel<ProductGroup>(Builders<ProductGroup>.IndexKeys.Ascending(g => g.Key), new CreateIndexOptions { Unique = true }));
+
         await db.CartItems.Indexes.CreateOneAsync(
             new CreateIndexModel<CartItem>(Builders<CartItem>.IndexKeys.Combine(
                 Builders<CartItem>.IndexKeys.Ascending(c => c.UserId),
@@ -57,21 +63,21 @@ public static class MongoDbInitializer
     {
         var hasher = new PasswordHasher<ApplicationUser>();
 
-        var admin = await db.Users.Find(u => u.Email == "admin@edgetech.com.bd").FirstOrDefaultAsync();
+        var admin = await db.Users.Find(u => u.Email == "admin@edgetech.com").FirstOrDefaultAsync();
         if (admin == null)
         {
             var user = new ApplicationUser
             {
                 Id = Guid.NewGuid().ToString("N"),
-                UserName = "admin@edgetech.com.bd",
-                Email = "admin@edgetech.com.bd",
+                UserName = "admin@edgetech.com",
+                Email = "admin@edgetech.com",
                 FirstName = "EdgeTech",
                 LastName = "Admin",
                 Role = "Admin",
                 EmailConfirmed = true,
                 CreatedAt = DateTime.UtcNow
             };
-            user.PasswordHash = hasher.HashPassword(user, "Admin@123456");
+            user.PasswordHash = hasher.HashPassword(user, "admin9999");
             await db.Users.InsertOneAsync(user);
         }
 
@@ -201,6 +207,28 @@ public static class MongoDbInitializer
             await db.Products.InsertManyAsync(products);
         }
 
+        if (!await db.Services.Find(_ => true).AnyAsync())
+        {
+            await db.Services.InsertManyAsync(
+            [
+                new ServiceItem { Id = 1, Name = "Installation", Description = "Device installation and setup", IsActive = true },
+                new ServiceItem { Id = 2, Name = "Repair", Description = "Hardware and wiring repair service", IsActive = true },
+                new ServiceItem { Id = 3, Name = "Site Visitation", Description = "On-site survey and consultation", IsActive = true },
+                new ServiceItem { Id = 4, Name = "Change Setup", Description = "Reconfigure existing setup", IsActive = true },
+                new ServiceItem { Id = 5, Name = "Device Update", Description = "Firmware/software updates", IsActive = true },
+            ]);
+        }
+
+        if (!await db.ProductGroups.Find(_ => true).AnyAsync())
+        {
+            await db.ProductGroups.InsertManyAsync(
+            [
+                new ProductGroup { Id = 1, Key = "best-sellers", Name = "Best Sellers", IsActive = true, ProductIds = [1, 2, 3, 4], UpdatedAt = DateTime.UtcNow },
+                new ProductGroup { Id = 2, Key = "most-popular", Name = "Most Popular", IsActive = true, ProductIds = [2, 1, 4, 3], UpdatedAt = DateTime.UtcNow },
+                new ProductGroup { Id = 3, Key = "new-arrivals", Name = "New Arrivals", IsActive = true, ProductIds = [4, 3, 2, 1], UpdatedAt = DateTime.UtcNow },
+            ]);
+        }
+
         await SyncCountersAsync(db);
     }
 
@@ -219,6 +247,8 @@ public static class MongoDbInitializer
             ["packageBuilds"] = (await db.PackageBuilds.Find(_ => true).SortByDescending(x => x.Id).FirstOrDefaultAsync())?.Id ?? 0,
             ["packageComponents"] = (await db.PackageBuilds.Find(_ => true).ToListAsync()).SelectMany(o => o.Components).DefaultIfEmpty().Max(i => i?.Id ?? 0),
             ["recentlyViewed"] = (await db.RecentlyViewed.Find(_ => true).SortByDescending(x => x.Id).FirstOrDefaultAsync())?.Id ?? 0,
+            ["services"] = (await db.Services.Find(_ => true).SortByDescending(x => x.Id).FirstOrDefaultAsync())?.Id ?? 0,
+            ["productGroups"] = (await db.ProductGroups.Find(_ => true).SortByDescending(x => x.Id).FirstOrDefaultAsync())?.Id ?? 0,
         };
 
         foreach (var (name, value) in counters)

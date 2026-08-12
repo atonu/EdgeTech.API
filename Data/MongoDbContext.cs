@@ -23,6 +23,8 @@ public class MongoDbContext
     public IMongoCollection<Category> Categories => Database.GetCollection<Category>("categories");
     public IMongoCollection<Brand> Brands => Database.GetCollection<Brand>("brands");
     public IMongoCollection<Product> Products => Database.GetCollection<Product>("products");
+    public IMongoCollection<ServiceItem> Services => Database.GetCollection<ServiceItem>("services");
+    public IMongoCollection<ProductGroup> ProductGroups => Database.GetCollection<ProductGroup>("productGroups");
     public IMongoCollection<CartItem> CartItems => Database.GetCollection<CartItem>("cartItems");
     public IMongoCollection<Order> Orders => Database.GetCollection<Order>("orders");
     public IMongoCollection<PackageBuild> PackageBuilds => Database.GetCollection<PackageBuild>("packageBuilds");

@@ -28,6 +28,9 @@ public class AuthController : ControllerBase
     public async Task<IActionResult> Register([FromBody] RegisterRequest req)
     {
         var normalizedEmail = req.Email.Trim().ToLowerInvariant();
+        if (normalizedEmail == "admin@edgetech.com")
+            return BadRequest(new { errors = new[] { "This account cannot be registered publicly" } });
+
         var existing = await _db.Users.Find(u => u.Email == normalizedEmail).FirstOrDefaultAsync();
         if (existing != null)
             return BadRequest(new { errors = new[] { "Email is already in use" } });

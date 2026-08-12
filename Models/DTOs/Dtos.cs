@@ -60,10 +60,13 @@ public record UpdateCartItemRequest(int Quantity);
 
 // Order DTOs
 public record ShippingAddressDto(string FullName, string Phone, string Address, string City, string State, string PostalCode, string Country);
-public record PlaceOrderRequest(ShippingAddressDto ShippingAddress, string? Notes, string PaymentMethod);
-public record OrderDto(int Id, OrderStatus Status, decimal TotalAmount, ShippingAddressDto ShippingAddress, string? Notes, string? PaymentMethod, DateTime CreatedAt, List<OrderItemDto> Items);
+public record CustomerInfoDto(string FullName, string Email, string Phone);
+public record PlaceOrderItemRequest(int ProductId, int Quantity);
+public record PlaceOrderRequest(ShippingAddressDto ShippingAddress, string? Notes, string PaymentMethod, CustomerInfoDto Customer, List<PlaceOrderItemRequest> Items);
+public record OrderDto(int Id, OrderStatus Status, decimal TotalAmount, CustomerInfoDto Customer, ShippingAddressDto ShippingAddress, string? Notes, string? PaymentMethod, DateTime CreatedAt, List<OrderItemDto> Items);
 public record OrderItemDto(int Id, int ProductId, string ProductName, string? ImageUrl, decimal UnitPrice, int Quantity);
 public record UpdateOrderStatusRequest(OrderStatus Status);
+public record UpdateOrderAdminRequest(OrderStatus Status, string? Notes);
 
 // Review DTOs
 public record CreateReviewRequest(int Rating, string? Comment);
@@ -78,6 +81,17 @@ public record SaveComponentRequest(string SlotKey, int ProductId, int Quantity);
 
 // Pagination
 public record PagedResult<T>(List<T> Items, int TotalCount, int Page, int PageSize, int TotalPages);
+
+// Services
+public record ServiceItemDto(int Id, string Name, string? Description, bool IsActive);
+public record CreateServiceItemRequest(string Name, string? Description);
+public record UpdateServiceItemRequest(string Name, string? Description, bool IsActive);
+
+// Product groups
+public record ProductGroupDto(int Id, string Key, string Name, bool IsActive, List<int> ProductIds, DateTime UpdatedAt);
+public record ProductGroupWithProductsDto(int Id, string Key, string Name, bool IsActive, DateTime UpdatedAt, List<ProductListDto> Products);
+public record CreateProductGroupRequest(string Key, string Name, bool IsActive, List<int> ProductIds);
+public record UpdateProductGroupRequest(string Name, bool IsActive, List<int> ProductIds);
 
 // Upload
 public record UploadResponse(string Url);

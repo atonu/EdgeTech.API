@@ -26,13 +26,27 @@ public class OrdersController : ControllerBase
     private string? UserId => User.FindFirstValue(ClaimTypes.NameIdentifier);
 
     [HttpPost]
-    [Authorize]
+    [AllowAnonymous]
     public async Task<IActionResult> PlaceOrder([FromBody] PlaceOrderRequest req)
     {
-        if (UserId == null)
-            return Unauthorized();
+        var userId = UserId;
 
-        var cartItems = await _db.CartItems.Find(ci => ci.UserId == UserId).ToListAsync();
+        List<CartItem> cartItems;
+        if (req.Items != null && req.Items.Count > 0)
+        {
+            cartItems = req.Items
+                .Where(i => i.Quantity > 0)
+                .Select(i => new CartItem { ProductId = i.ProductId, Quantity = i.Quantity, UserId = userId ?? "guest" })
+                .ToList();
+        }
+        else
+        {
+            if (userId == null)
+                return BadRequest(new { message = "Guest orders must include items" });
+
+            cartItems = await _db.CartItems.Find(ci => ci.UserId == userId).ToListAsync();
+        }
+
         if (!cartItems.Any()) return BadRequest(new { message = "Cart is empty" });
 
         var productIds = cartItems.Select(ci => ci.ProductId).Distinct().ToList();
@@ -61,8 +75,12 @@ public class OrdersController : ControllerBase
         var order = new Order
         {
             Id = orderId,
-            UserId = UserId,
-            Status = OrderStatus.Pending,
+            UserId = userId,
+            Status = OrderStatus.Placed,
+            CustomerName = req.Customer.FullName,
+            CustomerEmail = req.Customer.Email,
+            CustomerPhone = req.Customer.Phone,
+            IsGuestOrder = string.IsNullOrWhiteSpace(userId),
             ShippingAddress = JsonSerializer.Serialize(req.ShippingAddress),
             Notes = req.Notes,
             PaymentMethod = req.PaymentMethod,
@@ -92,7 +110,8 @@ public class OrdersController : ControllerBase
         }
 
         await _db.Orders.InsertOneAsync(order);
-        await _db.CartItems.DeleteManyAsync(ci => ci.UserId == UserId);
+        if (userId != null)
+            await _db.CartItems.DeleteManyAsync(ci => ci.UserId == userId);
 
         return Ok(new { orderId = order.Id });
     }
@@ -162,6 +181,25 @@ public class OrdersController : ControllerBase
         return Ok(new { status = result.Status.ToString() });
     }
 
+    [HttpPut("{id}/admin")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> UpdateOrderAdmin(int id, [FromBody] UpdateOrderAdminRequest req)
+    {
+        var update = Builders<Order>.Update
+            .Set(o => o.Status, req.Status)
+            .Set(o => o.Notes, req.Notes)
+            .Set(o => o.UpdatedAt, DateTime.UtcNow);
+        var filter = Builders<Order>.Filter.Eq(o => o.Id, id);
+
+        var result = await _db.Orders.FindOneAndUpdateAsync(filter, update, new FindOneAndUpdateOptions<Order, Order>
+        {
+            ReturnDocument = ReturnDocument.After
+        });
+
+        if (result == null) return NotFound();
+        return Ok(new { status = result.Status.ToString(), notes = result.Notes });
+    }
+
     private async Task<List<OrderDto>> MapOrdersToDtos(IEnumerable<Order> orders)
     {
         var orderList = orders.ToList();
@@ -178,6 +216,7 @@ public class OrdersController : ControllerBase
                 o.Id,
                 o.Status,
                 o.TotalAmount,
+                new CustomerInfoDto(o.CustomerName, o.CustomerEmail, o.CustomerPhone),
                 address,
                 o.Notes,
                 o.PaymentMethod,

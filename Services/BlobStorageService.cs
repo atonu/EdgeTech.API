@@ -11,19 +11,20 @@ public interface IBlobStorageService
 
 public class BlobStorageService : IBlobStorageService
 {
-    private readonly BlobServiceClient _client;
+    private readonly Lazy<BlobServiceClient> _client;
     private readonly string _containerName;
 
     public BlobStorageService(IConfiguration config)
     {
         var connectionString = config["AzureBlobStorage:ConnectionString"]!;
         _containerName = config["AzureBlobStorage:ContainerName"] ?? "edgetech-products";
-        _client = new BlobServiceClient(connectionString);
+        // ponytail: lazy so a missing/placeholder connection string only breaks uploads, not every controller that depends on this service
+        _client = new Lazy<BlobServiceClient>(() => new BlobServiceClient(connectionString));
     }
 
     public async Task<string> UploadAsync(IFormFile file, string container, string folder)
     {
-        var containerClient = _client.GetBlobContainerClient(_containerName);
+        var containerClient = _client.Value.GetBlobContainerClient(_containerName);
         await containerClient.CreateIfNotExistsAsync(PublicAccessType.Blob);
 
         var extension = Path.GetExtension(file.FileName);
@@ -40,7 +41,7 @@ public class BlobStorageService : IBlobStorageService
     {
         var uri = new Uri(blobUrl);
         var blobName = string.Join("/", uri.Segments.Skip(2));
-        var containerClient = _client.GetBlobContainerClient(_containerName);
+        var containerClient = _client.Value.GetBlobContainerClient(_containerName);
         await containerClient.DeleteBlobIfExistsAsync(blobName);
     }
 }

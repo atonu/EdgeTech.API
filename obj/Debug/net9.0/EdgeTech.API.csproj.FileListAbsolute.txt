@@ -1,178 +1,3 @@
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\appsettings.Development.json
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\appsettings.json
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\EdgeTech.API.staticwebassets.endpoints.json
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\EdgeTech.API.exe
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\EdgeTech.API.deps.json
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\EdgeTech.API.runtimeconfig.json
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\EdgeTech.API.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\EdgeTech.API.pdb
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\Azure.Core.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\Azure.Identity.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\Azure.Storage.Blobs.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\Azure.Storage.Common.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\Humanizer.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\Microsoft.AspNetCore.Cryptography.Internal.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\Microsoft.AspNetCore.Cryptography.KeyDerivation.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\Microsoft.AspNetCore.Identity.EntityFrameworkCore.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\Microsoft.AspNetCore.OpenApi.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\Microsoft.Bcl.AsyncInterfaces.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\Microsoft.Build.Locator.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\Microsoft.CodeAnalysis.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\Microsoft.CodeAnalysis.CSharp.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\Microsoft.CodeAnalysis.CSharp.Workspaces.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\Microsoft.CodeAnalysis.Workspaces.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\Microsoft.CodeAnalysis.Workspaces.MSBuild.BuildHost.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\Microsoft.CodeAnalysis.Workspaces.MSBuild.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\Microsoft.Data.SqlClient.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\Microsoft.EntityFrameworkCore.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\Microsoft.EntityFrameworkCore.Abstractions.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\Microsoft.EntityFrameworkCore.Design.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\Microsoft.EntityFrameworkCore.Relational.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\Microsoft.EntityFrameworkCore.SqlServer.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\Microsoft.Extensions.Caching.Abstractions.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\Microsoft.Extensions.Caching.Memory.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\Microsoft.Extensions.Configuration.Abstractions.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\Microsoft.Extensions.DependencyInjection.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\Microsoft.Extensions.DependencyInjection.Abstractions.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\Microsoft.Extensions.DependencyModel.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\Microsoft.Extensions.Identity.Core.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\Microsoft.Extensions.Identity.Stores.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\Microsoft.Extensions.Logging.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\Microsoft.Extensions.Logging.Abstractions.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\Microsoft.Extensions.Options.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\Microsoft.Extensions.Primitives.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\Microsoft.Identity.Client.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\Microsoft.Identity.Client.Extensions.Msal.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\Microsoft.IdentityModel.Abstractions.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\Microsoft.IdentityModel.JsonWebTokens.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\Microsoft.IdentityModel.Logging.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\Microsoft.IdentityModel.Protocols.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\Microsoft.IdentityModel.Protocols.OpenIdConnect.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\Microsoft.IdentityModel.Tokens.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\Microsoft.OpenApi.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\Microsoft.SqlServer.Server.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\Microsoft.Win32.SystemEvents.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\Mono.TextTemplating.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\Swashbuckle.AspNetCore.Swagger.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\Swashbuckle.AspNetCore.SwaggerGen.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\Swashbuckle.AspNetCore.SwaggerUI.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\System.ClientModel.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\System.CodeDom.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\System.Composition.AttributedModel.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\System.Composition.Convention.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\System.Composition.Hosting.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\System.Composition.Runtime.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\System.Composition.TypedParts.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\System.Configuration.ConfigurationManager.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\System.Drawing.Common.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\System.IdentityModel.Tokens.Jwt.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\System.IO.Hashing.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\System.Memory.Data.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\System.Runtime.Caching.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\System.Security.Cryptography.ProtectedData.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\System.Security.Permissions.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\System.Windows.Extensions.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\cs\Microsoft.CodeAnalysis.resources.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\de\Microsoft.CodeAnalysis.resources.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\es\Microsoft.CodeAnalysis.resources.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\fr\Microsoft.CodeAnalysis.resources.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\it\Microsoft.CodeAnalysis.resources.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\ja\Microsoft.CodeAnalysis.resources.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\ko\Microsoft.CodeAnalysis.resources.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\pl\Microsoft.CodeAnalysis.resources.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\pt-BR\Microsoft.CodeAnalysis.resources.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\ru\Microsoft.CodeAnalysis.resources.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\tr\Microsoft.CodeAnalysis.resources.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\zh-Hans\Microsoft.CodeAnalysis.resources.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\zh-Hant\Microsoft.CodeAnalysis.resources.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\cs\Microsoft.CodeAnalysis.CSharp.resources.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\de\Microsoft.CodeAnalysis.CSharp.resources.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\es\Microsoft.CodeAnalysis.CSharp.resources.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\fr\Microsoft.CodeAnalysis.CSharp.resources.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\it\Microsoft.CodeAnalysis.CSharp.resources.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\ja\Microsoft.CodeAnalysis.CSharp.resources.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\ko\Microsoft.CodeAnalysis.CSharp.resources.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\pl\Microsoft.CodeAnalysis.CSharp.resources.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\pt-BR\Microsoft.CodeAnalysis.CSharp.resources.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\ru\Microsoft.CodeAnalysis.CSharp.resources.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\tr\Microsoft.CodeAnalysis.CSharp.resources.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\zh-Hans\Microsoft.CodeAnalysis.CSharp.resources.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\zh-Hant\Microsoft.CodeAnalysis.CSharp.resources.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\cs\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\de\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\es\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\fr\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\it\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\ja\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\ko\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\pl\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\pt-BR\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\ru\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\tr\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\zh-Hans\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\zh-Hant\Microsoft.CodeAnalysis.CSharp.Workspaces.resources.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\cs\Microsoft.CodeAnalysis.Workspaces.resources.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\de\Microsoft.CodeAnalysis.Workspaces.resources.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\es\Microsoft.CodeAnalysis.Workspaces.resources.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\fr\Microsoft.CodeAnalysis.Workspaces.resources.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\it\Microsoft.CodeAnalysis.Workspaces.resources.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\ja\Microsoft.CodeAnalysis.Workspaces.resources.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\ko\Microsoft.CodeAnalysis.Workspaces.resources.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\pl\Microsoft.CodeAnalysis.Workspaces.resources.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\pt-BR\Microsoft.CodeAnalysis.Workspaces.resources.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\ru\Microsoft.CodeAnalysis.Workspaces.resources.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\tr\Microsoft.CodeAnalysis.Workspaces.resources.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\zh-Hans\Microsoft.CodeAnalysis.Workspaces.resources.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\zh-Hant\Microsoft.CodeAnalysis.Workspaces.resources.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\cs\Microsoft.CodeAnalysis.Workspaces.MSBuild.BuildHost.resources.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\de\Microsoft.CodeAnalysis.Workspaces.MSBuild.BuildHost.resources.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\es\Microsoft.CodeAnalysis.Workspaces.MSBuild.BuildHost.resources.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\fr\Microsoft.CodeAnalysis.Workspaces.MSBuild.BuildHost.resources.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\it\Microsoft.CodeAnalysis.Workspaces.MSBuild.BuildHost.resources.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\ja\Microsoft.CodeAnalysis.Workspaces.MSBuild.BuildHost.resources.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\ko\Microsoft.CodeAnalysis.Workspaces.MSBuild.BuildHost.resources.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\pl\Microsoft.CodeAnalysis.Workspaces.MSBuild.BuildHost.resources.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\pt-BR\Microsoft.CodeAnalysis.Workspaces.MSBuild.BuildHost.resources.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\ru\Microsoft.CodeAnalysis.Workspaces.MSBuild.BuildHost.resources.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\tr\Microsoft.CodeAnalysis.Workspaces.MSBuild.BuildHost.resources.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\zh-Hans\Microsoft.CodeAnalysis.Workspaces.MSBuild.BuildHost.resources.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\zh-Hant\Microsoft.CodeAnalysis.Workspaces.MSBuild.BuildHost.resources.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\runtimes\unix\lib\net6.0\Microsoft.Data.SqlClient.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\runtimes\win\lib\net6.0\Microsoft.Data.SqlClient.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\runtimes\win-arm\native\Microsoft.Data.SqlClient.SNI.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\runtimes\win-arm64\native\Microsoft.Data.SqlClient.SNI.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\runtimes\win-x64\native\Microsoft.Data.SqlClient.SNI.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\runtimes\win-x86\native\Microsoft.Data.SqlClient.SNI.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\runtimes\win\lib\net6.0\Microsoft.Win32.SystemEvents.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\runtimes\unix\lib\net6.0\System.Drawing.Common.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\runtimes\win\lib\net6.0\System.Drawing.Common.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\runtimes\win\lib\net6.0\System.Runtime.Caching.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\runtimes\win\lib\net6.0\System.Security.Cryptography.ProtectedData.dll
-F:\Work\edgetech 2.0\EdgeTech.API\bin\Debug\net9.0\runtimes\win\lib\net6.0\System.Windows.Extensions.dll
-F:\Work\edgetech 2.0\EdgeTech.API\obj\Debug\net9.0\EdgeTech.API.csproj.AssemblyReference.cache
-F:\Work\edgetech 2.0\EdgeTech.API\obj\Debug\net9.0\rpswa.dswa.cache.json
-F:\Work\edgetech 2.0\EdgeTech.API\obj\Debug\net9.0\EdgeTech.API.GeneratedMSBuildEditorConfig.editorconfig
-F:\Work\edgetech 2.0\EdgeTech.API\obj\Debug\net9.0\EdgeTech.API.AssemblyInfoInputs.cache
-F:\Work\edgetech 2.0\EdgeTech.API\obj\Debug\net9.0\EdgeTech.API.AssemblyInfo.cs
-F:\Work\edgetech 2.0\EdgeTech.API\obj\Debug\net9.0\EdgeTech.API.csproj.CoreCompileInputs.cache
-F:\Work\edgetech 2.0\EdgeTech.API\obj\Debug\net9.0\EdgeTech.API.MvcApplicationPartsAssemblyInfo.cs
-F:\Work\edgetech 2.0\EdgeTech.API\obj\Debug\net9.0\EdgeTech.API.MvcApplicationPartsAssemblyInfo.cache
-F:\Work\edgetech 2.0\EdgeTech.API\obj\Debug\net9.0\rjimswa.dswa.cache.json
-F:\Work\edgetech 2.0\EdgeTech.API\obj\Debug\net9.0\rjsmrazor.dswa.cache.json
-F:\Work\edgetech 2.0\EdgeTech.API\obj\Debug\net9.0\rjsmcshtml.dswa.cache.json
-F:\Work\edgetech 2.0\EdgeTech.API\obj\Debug\net9.0\scopedcss\bundle\EdgeTech.API.styles.css
-F:\Work\edgetech 2.0\EdgeTech.API\obj\Debug\net9.0\staticwebassets.build.json
-F:\Work\edgetech 2.0\EdgeTech.API\obj\Debug\net9.0\staticwebassets.build.json.cache
-F:\Work\edgetech 2.0\EdgeTech.API\obj\Debug\net9.0\staticwebassets.development.json
-F:\Work\edgetech 2.0\EdgeTech.API\obj\Debug\net9.0\staticwebassets.build.endpoints.json
-F:\Work\edgetech 2.0\EdgeTech.API\obj\Debug\net9.0\swae.build.ex.cache
-F:\Work\edgetech 2.0\EdgeTech.API\obj\Debug\net9.0\EdgeTech.2C9633D3.Up2Date
-F:\Work\edgetech 2.0\EdgeTech.API\obj\Debug\net9.0\EdgeTech.API.dll
-F:\Work\edgetech 2.0\EdgeTech.API\obj\Debug\net9.0\refint\EdgeTech.API.dll
-F:\Work\edgetech 2.0\EdgeTech.API\obj\Debug\net9.0\EdgeTech.API.pdb
-F:\Work\edgetech 2.0\EdgeTech.API\obj\Debug\net9.0\EdgeTech.API.genruntimeconfig.cache
-F:\Work\edgetech 2.0\EdgeTech.API\obj\Debug\net9.0\ref\EdgeTech.API.dll
 C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\bin\Debug\net9.0\appsettings.Development.json
 C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\bin\Debug\net9.0\appsettings.json
 C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\bin\Debug\net9.0\EdgeTech.API.staticwebassets.endpoints.json
@@ -181,9 +6,13 @@ C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\bin\Debug\net9.0\
 C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\bin\Debug\net9.0\EdgeTech.API.runtimeconfig.json
 C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\bin\Debug\net9.0\EdgeTech.API.dll
 C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\bin\Debug\net9.0\EdgeTech.API.pdb
+C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\bin\Debug\net9.0\EdgeTech.API.xml
+C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\bin\Debug\net9.0\AWSSDK.Core.dll
+C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\bin\Debug\net9.0\AWSSDK.SecurityToken.dll
 C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\bin\Debug\net9.0\Azure.Core.dll
 C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\bin\Debug\net9.0\Azure.Storage.Blobs.dll
 C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\bin\Debug\net9.0\Azure.Storage.Common.dll
+C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\bin\Debug\net9.0\DnsClient.dll
 C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\bin\Debug\net9.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
 C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\bin\Debug\net9.0\Microsoft.AspNetCore.OpenApi.dll
 C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\bin\Debug\net9.0\Microsoft.Bcl.AsyncInterfaces.dll
@@ -194,6 +23,12 @@ C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\bin\Debug\net9.0\
 C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\bin\Debug\net9.0\Microsoft.IdentityModel.Protocols.OpenIdConnect.dll
 C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\bin\Debug\net9.0\Microsoft.IdentityModel.Tokens.dll
 C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\bin\Debug\net9.0\Microsoft.OpenApi.dll
+C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\bin\Debug\net9.0\MongoDB.Bson.dll
+C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\bin\Debug\net9.0\MongoDB.Driver.dll
+C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\bin\Debug\net9.0\MongoDB.Driver.Core.dll
+C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\bin\Debug\net9.0\MongoDB.Libmongocrypt.dll
+C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\bin\Debug\net9.0\SharpCompress.dll
+C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\bin\Debug\net9.0\Snappier.dll
 C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\bin\Debug\net9.0\Swashbuckle.AspNetCore.Swagger.dll
 C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\bin\Debug\net9.0\Swashbuckle.AspNetCore.SwaggerGen.dll
 C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\bin\Debug\net9.0\Swashbuckle.AspNetCore.SwaggerUI.dll
@@ -201,6 +36,10 @@ C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\bin\Debug\net9.0\
 C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\bin\Debug\net9.0\System.IdentityModel.Tokens.Jwt.dll
 C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\bin\Debug\net9.0\System.IO.Hashing.dll
 C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\bin\Debug\net9.0\System.Memory.Data.dll
+C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\bin\Debug\net9.0\ZstdSharp.dll
+C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\bin\Debug\net9.0\runtimes\linux\native\libmongocrypt.so
+C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\bin\Debug\net9.0\runtimes\osx\native\libmongocrypt.dylib
+C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\bin\Debug\net9.0\runtimes\win\native\mongocrypt.dll
 C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\obj\Debug\net9.0\EdgeTech.API.csproj.AssemblyReference.cache
 C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\obj\Debug\net9.0\rpswa.dswa.cache.json
 C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\obj\Debug\net9.0\EdgeTech.API.GeneratedMSBuildEditorConfig.editorconfig
@@ -222,63 +61,7 @@ C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\obj\Debug\net9.0\
 C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\obj\Debug\net9.0\EdgeTech.2C9633D3.Up2Date
 C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\obj\Debug\net9.0\EdgeTech.API.dll
 C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\obj\Debug\net9.0\refint\EdgeTech.API.dll
+C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\obj\Debug\net9.0\EdgeTech.API.xml
 C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\obj\Debug\net9.0\EdgeTech.API.pdb
 C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\obj\Debug\net9.0\EdgeTech.API.genruntimeconfig.cache
 C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\obj\Debug\net9.0\ref\EdgeTech.API.dll
-C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\bin\Debug\net9.0\EdgeTech.API.xml
-C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\obj\Debug\net9.0\EdgeTech.API.xml
-C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\bin\Debug\net9.0\AWSSDK.Core.dll
-C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\bin\Debug\net9.0\AWSSDK.SecurityToken.dll
-C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\bin\Debug\net9.0\DnsClient.dll
-C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\bin\Debug\net9.0\MongoDB.Bson.dll
-C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\bin\Debug\net9.0\MongoDB.Driver.dll
-C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\bin\Debug\net9.0\MongoDB.Driver.Core.dll
-C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\bin\Debug\net9.0\MongoDB.Libmongocrypt.dll
-C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\bin\Debug\net9.0\SharpCompress.dll
-C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\bin\Debug\net9.0\Snappier.dll
-C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\bin\Debug\net9.0\ZstdSharp.dll
-C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\bin\Debug\net9.0\runtimes\linux\native\libmongocrypt.so
-C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\bin\Debug\net9.0\runtimes\osx\native\libmongocrypt.dylib
-C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\bin\Debug\net9.0\runtimes\win\native\mongocrypt.dll
-C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\temp-build-out\appsettings.Development.json
-C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\temp-build-out\appsettings.json
-C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\temp-build-out\EdgeTech.API.staticwebassets.endpoints.json
-C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\temp-build-out\EdgeTech.API.exe
-C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\temp-build-out\EdgeTech.API.deps.json
-C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\temp-build-out\EdgeTech.API.runtimeconfig.json
-C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\temp-build-out\EdgeTech.API.dll
-C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\temp-build-out\EdgeTech.API.pdb
-C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\temp-build-out\EdgeTech.API.xml
-C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\temp-build-out\AWSSDK.Core.dll
-C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\temp-build-out\AWSSDK.SecurityToken.dll
-C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\temp-build-out\Azure.Core.dll
-C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\temp-build-out\Azure.Storage.Blobs.dll
-C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\temp-build-out\Azure.Storage.Common.dll
-C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\temp-build-out\DnsClient.dll
-C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\temp-build-out\Microsoft.AspNetCore.Authentication.JwtBearer.dll
-C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\temp-build-out\Microsoft.AspNetCore.OpenApi.dll
-C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\temp-build-out\Microsoft.Bcl.AsyncInterfaces.dll
-C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\temp-build-out\Microsoft.IdentityModel.Abstractions.dll
-C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\temp-build-out\Microsoft.IdentityModel.JsonWebTokens.dll
-C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\temp-build-out\Microsoft.IdentityModel.Logging.dll
-C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\temp-build-out\Microsoft.IdentityModel.Protocols.dll
-C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\temp-build-out\Microsoft.IdentityModel.Protocols.OpenIdConnect.dll
-C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\temp-build-out\Microsoft.IdentityModel.Tokens.dll
-C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\temp-build-out\Microsoft.OpenApi.dll
-C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\temp-build-out\MongoDB.Bson.dll
-C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\temp-build-out\MongoDB.Driver.dll
-C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\temp-build-out\MongoDB.Driver.Core.dll
-C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\temp-build-out\MongoDB.Libmongocrypt.dll
-C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\temp-build-out\SharpCompress.dll
-C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\temp-build-out\Snappier.dll
-C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\temp-build-out\Swashbuckle.AspNetCore.Swagger.dll
-C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\temp-build-out\Swashbuckle.AspNetCore.SwaggerGen.dll
-C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\temp-build-out\Swashbuckle.AspNetCore.SwaggerUI.dll
-C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\temp-build-out\System.ClientModel.dll
-C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\temp-build-out\System.IdentityModel.Tokens.Jwt.dll
-C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\temp-build-out\System.IO.Hashing.dll
-C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\temp-build-out\System.Memory.Data.dll
-C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\temp-build-out\ZstdSharp.dll
-C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\temp-build-out\runtimes\linux\native\libmongocrypt.so
-C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\temp-build-out\runtimes\osx\native\libmongocrypt.dylib
-C:\Users\ahmed\Documents\GitHub\edgetech\edgetech\EdgeTech.API\temp-build-out\runtimes\win\native\mongocrypt.dll

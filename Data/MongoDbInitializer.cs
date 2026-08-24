@@ -81,49 +81,42 @@ public static class MongoDbInitializer
             await db.Users.InsertOneAsync(user);
         }
 
-        if (!await db.Brands.Find(_ => true).AnyAsync())
+        var brands = new[]
         {
-            var brands = new[]
-            {
-                new Brand { Id = 1, Name = "Hikvision", Slug = "hikvision", Description = "World's leading video surveillance manufacturer" },
-                new Brand { Id = 2, Name = "Dahua", Slug = "dahua", Description = "Leading solution provider in the global video-centric AIoT industry" },
-                new Brand { Id = 3, Name = "Imou", Slug = "imou", Description = "Smart living security brand by Dahua" },
-                new Brand { Id = 4, Name = "TP-Link", Slug = "tp-link", Description = "World's #1 provider of consumer WiFi" },
-                new Brand { Id = 5, Name = "Uniview", Slug = "uniview", Description = "IP video surveillance innovator" },
-                new Brand { Id = 6, Name = "Seagate", Slug = "seagate", Description = "Data storage solutions" },
-                new Brand { Id = 7, Name = "Dell", Slug = "dell", Description = "Display and computing solutions" },
-                new Brand { Id = 8, Name = "ZKTeco", Slug = "zkteco", Description = "Security and smart entrance solutions" },
-                new Brand { Id = 9, Name = "Ruijie", Slug = "ruijie", Description = "Enterprise network infrastructure" },
-            };
+            new Brand { Id = 1, Name = "Hikvision", Slug = "hikvision", Description = "World's leading video surveillance manufacturer" },
+            new Brand { Id = 2, Name = "Dahua", Slug = "dahua", Description = "Leading solution provider in the global video-centric AIoT industry" },
+            new Brand { Id = 3, Name = "Imou", Slug = "imou", Description = "Smart living security brand by Dahua" },
+            new Brand { Id = 4, Name = "TP-Link", Slug = "tp-link", Description = "World's #1 provider of consumer WiFi" },
+            new Brand { Id = 5, Name = "Uniview", Slug = "uniview", Description = "IP video surveillance innovator" },
+            new Brand { Id = 6, Name = "Seagate", Slug = "seagate", Description = "Data storage solutions" },
+            new Brand { Id = 7, Name = "Dell", Slug = "dell", Description = "Display and computing solutions" },
+            new Brand { Id = 8, Name = "ZKTeco", Slug = "zkteco", Description = "Security and smart entrance solutions" },
+            new Brand { Id = 9, Name = "Ruijie", Slug = "ruijie", Description = "Enterprise network infrastructure" },
+            new Brand { Id = 10, Name = "APC", Slug = "apc", Description = "Power protection and backup solutions" },
+            new Brand { Id = 11, Name = "Generic", Slug = "generic", Description = "Unbranded and generic accessories" },
+        };
+        await UpsertMissingAsync(db.Brands, brands, b => b.Id);
 
-            await db.Brands.InsertManyAsync(brands);
-        }
-
-        if (!await db.Categories.Find(_ => true).AnyAsync())
+        var categories = new[]
         {
-            var categories = new[]
-            {
-                new Category { Id = 1, Name = "CCTV & Surveillance", Slug = "cctv-surveillance", DisplayOrder = 1 },
-                new Category { Id = 2, Name = "Networking", Slug = "networking", DisplayOrder = 2 },
-                new Category { Id = 3, Name = "Storage", Slug = "storage", DisplayOrder = 3 },
-                new Category { Id = 4, Name = "Accessories", Slug = "accessories", DisplayOrder = 4 },
-                new Category { Id = 5, Name = "IP Cameras", Slug = "ip-cameras", ParentCategoryId = 1, DisplayOrder = 1 },
-                new Category { Id = 6, Name = "Analog Cameras", Slug = "analog-cameras", ParentCategoryId = 1, DisplayOrder = 2 },
-                new Category { Id = 7, Name = "DVR / NVR", Slug = "dvr-nvr", ParentCategoryId = 1, DisplayOrder = 3 },
-                new Category { Id = 8, Name = "Monitor", Slug = "monitor", ParentCategoryId = 1, DisplayOrder = 4 },
-                new Category { Id = 9, Name = "HDD", Slug = "hdd", ParentCategoryId = 3, DisplayOrder = 1 },
-                new Category { Id = 10, Name = "Power Adapter", Slug = "power-adapter", ParentCategoryId = 4, DisplayOrder = 1 },
-                new Category { Id = 11, Name = "Cable", Slug = "cable", ParentCategoryId = 4, DisplayOrder = 2 },
-                new Category { Id = 12, Name = "UPS", Slug = "ups", ParentCategoryId = 4, DisplayOrder = 3 },
-            };
+            new Category { Id = 1, Name = "CCTV & Surveillance", Slug = "cctv-surveillance", DisplayOrder = 1 },
+            new Category { Id = 2, Name = "Networking", Slug = "networking", DisplayOrder = 2 },
+            new Category { Id = 3, Name = "Storage", Slug = "storage", DisplayOrder = 3 },
+            new Category { Id = 4, Name = "Accessories", Slug = "accessories", DisplayOrder = 4 },
+            new Category { Id = 5, Name = "IP Cameras", Slug = "ip-cameras", ParentCategoryId = 1, DisplayOrder = 1 },
+            new Category { Id = 6, Name = "Analog Cameras", Slug = "analog-cameras", ParentCategoryId = 1, DisplayOrder = 2 },
+            new Category { Id = 7, Name = "DVR / NVR", Slug = "dvr-nvr", ParentCategoryId = 1, DisplayOrder = 3 },
+            new Category { Id = 8, Name = "Monitor", Slug = "monitor", ParentCategoryId = 1, DisplayOrder = 4 },
+            new Category { Id = 9, Name = "HDD", Slug = "hdd", ParentCategoryId = 3, DisplayOrder = 1 },
+            new Category { Id = 10, Name = "Power Adapter", Slug = "power-adapter", ParentCategoryId = 4, DisplayOrder = 1 },
+            new Category { Id = 11, Name = "Cable", Slug = "cable", ParentCategoryId = 4, DisplayOrder = 2 },
+            new Category { Id = 12, Name = "UPS", Slug = "ups", ParentCategoryId = 4, DisplayOrder = 3 },
+            new Category { Id = 13, Name = "Access Control", Slug = "access-control", DisplayOrder = 5 },
+        };
+        await UpsertMissingAsync(db.Categories, categories, c => c.Id);
 
-            await db.Categories.InsertManyAsync(categories);
-        }
-
-        if (!await db.Products.Find(_ => true).AnyAsync())
+        var products = new[]
         {
-            var products = new[]
-            {
                 new Product
                 {
                     Id = 1,
@@ -201,11 +194,106 @@ public static class MongoDbInitializer
                         new ProductSpecification { Id = 7, ProductId = 4, Key = "Capacity", Value = "2TB", DisplayOrder = 1 },
                         new ProductSpecification { Id = 8, ProductId = 4, Key = "Interface", Value = "SATA", DisplayOrder = 2 }
                     ]
-                }
-            };
+                },
+                new Product
+                {
+                    Id = 5, Name = "Hikvision 4MP Dome Camera", Slug = "hikvision-4mp-dome-camera",
+                    ShortDescription = "4MP fixed dome network camera", Description = "Reliable 4MP dome camera for indoor and outdoor surveillance.",
+                    Price = 12500, DiscountPrice = 10625, SKU = "HIK-DOME-4MP", Stock = 20, IsFeatured = true, CategoryId = 5, BrandId = 1,
+                },
+                new Product
+                {
+                    Id = 6, Name = "Dahua 8CH NVR System", Slug = "dahua-8ch-nvr-system",
+                    ShortDescription = "8-channel network video recorder", Description = "8-channel NVR with support for up to 8MP cameras.",
+                    Price = 35000, SKU = "DAH-NVR-8CH", Stock = 21, IsFeatured = true, CategoryId = 7, BrandId = 2,
+                },
+                new Product
+                {
+                    Id = 7, Name = "TP-Link 16-Port Switch", Slug = "tp-link-16-port-switch",
+                    ShortDescription = "16-port unmanaged network switch", Description = "Gigabit unmanaged switch for expanding wired networks.",
+                    Price = 8500, SKU = "TPL-SW-16P", Stock = 22, IsFeatured = true, CategoryId = 2, BrandId = 4,
+                },
+                new Product
+                {
+                    Id = 8, Name = "Seagate 4TB HDD", Slug = "seagate-4tb-hdd",
+                    ShortDescription = "4TB surveillance-grade hard drive", Description = "High-endurance HDD built for continuous DVR/NVR recording.",
+                    Price = 14000, SKU = "SEA-HDD-4TB", Stock = 23, IsFeatured = true, CategoryId = 9, BrandId = 6,
+                },
+                new Product
+                {
+                    Id = 9, Name = "Hikvision PTZ Camera", Slug = "hikvision-ptz-camera",
+                    ShortDescription = "Pan-tilt-zoom network camera", Description = "Motorized PTZ camera with wide area coverage.",
+                    Price = 45000, DiscountPrice = 38250, SKU = "HIK-PTZ-01", Stock = 24, IsFeatured = true, CategoryId = 5, BrandId = 1,
+                },
+                new Product
+                {
+                    Id = 10, Name = "Dahua 2MP Bullet Cam", Slug = "dahua-2mp-bullet-cam",
+                    ShortDescription = "2MP analog bullet camera", Description = "Weatherproof bullet camera for outdoor CC surveillance.",
+                    Price = 8900, SKU = "DAH-BUL-2MP", Stock = 0, IsFeatured = true, CategoryId = 6, BrandId = 2,
+                },
+                new Product
+                {
+                    Id = 11, Name = "APC UPS 1200VA", Slug = "apc-ups-1200va",
+                    ShortDescription = "1200VA uninterruptible power supply", Description = "Backup power for DVR/NVR and networking equipment.",
+                    Price = 11500, SKU = "APC-UPS-1200", Stock = 26, IsFeatured = true, CategoryId = 12, BrandId = 10,
+                },
+                new Product
+                {
+                    Id = 12, Name = "Cat6 Network Cable 305m", Slug = "cat6-network-cable-305m",
+                    ShortDescription = "305m Cat6 UTP cable roll", Description = "Solid copper Cat6 cable for structured cabling runs.",
+                    Price = 6500, SKU = "GEN-CAT6-305", Stock = 27, IsFeatured = true, CategoryId = 11, BrandId = 11,
+                },
+                new Product
+                {
+                    Id = 13, Name = "Hikvision 8MP Turret", Slug = "hikvision-8mp-turret",
+                    ShortDescription = "8MP fixed turret network camera", Description = "High-resolution turret camera for detailed monitoring.",
+                    Price = 28000, DiscountPrice = 23800, SKU = "HIK-TUR-8MP", Stock = 28, CategoryId = 5, BrandId = 1,
+                },
+                new Product
+                {
+                    Id = 14, Name = "Dell 24\" Monitor", Slug = "dell-24-inch-monitor",
+                    ShortDescription = "24-inch Full HD monitor", Description = "Monitor for CCTV live view and workstation use.",
+                    Price = 22000, SKU = "DELL-MON-24", Stock = 29, CategoryId = 8, BrandId = 7,
+                },
+                new Product
+                {
+                    Id = 15, Name = "Dahua XVR 16CH", Slug = "dahua-xvr-16ch",
+                    ShortDescription = "16-channel HDCVI digital video recorder", Description = "Supports analog, IP, and HD-CVI cameras on one recorder.",
+                    Price = 25000, SKU = "DAH-XVR-16", Stock = 30, CategoryId = 7, BrandId = 2,
+                },
+                new Product
+                {
+                    Id = 16, Name = "BNC Video Balun Pack", Slug = "bnc-video-balun-pack",
+                    ShortDescription = "Video balun connector pack", Description = "Passive baluns for running analog video over UTP cable.",
+                    Price = 2500, SKU = "GEN-BALUN-PK", Stock = 31, CategoryId = 4, BrandId = 11,
+                },
+                new Product
+                {
+                    Id = 17, Name = "Imou Cruiser 4MP", Slug = "imou-cruiser-4mp",
+                    ShortDescription = "4MP Wi-Fi pan-tilt camera", Description = "Smart home Wi-Fi camera with motion tracking.",
+                    Price = 15000, DiscountPrice = 12750, SKU = "IMO-CRU-4MP", Stock = 32, CategoryId = 5, BrandId = 3,
+                },
+                new Product
+                {
+                    Id = 18, Name = "Uniview 4CH NVR", Slug = "uniview-4ch-nvr",
+                    ShortDescription = "4-channel network video recorder", Description = "Compact NVR for small-site surveillance setups.",
+                    Price = 18000, SKU = "UNV-NVR-4CH", Stock = 33, CategoryId = 7, BrandId = 5,
+                },
+                new Product
+                {
+                    Id = 19, Name = "Ruijie 24-Port Switch", Slug = "ruijie-24-port-switch",
+                    ShortDescription = "24-port enterprise network switch", Description = "Managed switch for enterprise network infrastructure.",
+                    Price = 12000, SKU = "RJ-SW-24P", Stock = 34, CategoryId = 2, BrandId = 9,
+                },
+                new Product
+                {
+                    Id = 20, Name = "ZKTeco Biometric Access Control", Slug = "zkteco-biometric-access",
+                    ShortDescription = "Fingerprint access control terminal", Description = "Biometric terminal for door access control and attendance.",
+                    Price = 9500, SKU = "ZK-BIO-01", Stock = 35, CategoryId = 13, BrandId = 8,
+                },
+        };
 
-            await db.Products.InsertManyAsync(products);
-        }
+        await UpsertMissingAsync(db.Products, products, p => p.Id);
 
         if (!await db.Services.Find(_ => true).AnyAsync())
         {
@@ -219,17 +307,26 @@ public static class MongoDbInitializer
             ]);
         }
 
-        if (!await db.ProductGroups.Find(_ => true).AnyAsync())
+        var groups = new[]
         {
-            await db.ProductGroups.InsertManyAsync(
-            [
-                new ProductGroup { Id = 1, Key = "best-sellers", Name = "Best Sellers", IsActive = true, ProductIds = [1, 2, 3, 4], UpdatedAt = DateTime.UtcNow },
-                new ProductGroup { Id = 2, Key = "most-popular", Name = "Most Popular", IsActive = true, ProductIds = [2, 1, 4, 3], UpdatedAt = DateTime.UtcNow },
-                new ProductGroup { Id = 3, Key = "new-arrivals", Name = "New Arrivals", IsActive = true, ProductIds = [4, 3, 2, 1], UpdatedAt = DateTime.UtcNow },
-            ]);
+            new ProductGroup { Id = 1, Key = "best-sellers", Name = "Best Sellers", IsActive = true, ProductIds = [5, 6, 7, 9], UpdatedAt = DateTime.UtcNow },
+            new ProductGroup { Id = 2, Key = "most-popular", Name = "Most Popular", IsActive = true, ProductIds = [11, 12, 8, 13], UpdatedAt = DateTime.UtcNow },
+            new ProductGroup { Id = 3, Key = "new-arrivals", Name = "New Arrivals", IsActive = true, ProductIds = [17, 18, 19, 20, 14, 15], UpdatedAt = DateTime.UtcNow },
+        };
+        foreach (var group in groups)
+        {
+            await db.ProductGroups.ReplaceOneAsync(g => g.Key == group.Key, group, new ReplaceOptions { IsUpsert = true });
         }
 
         await SyncCountersAsync(db);
+    }
+
+    private static async Task UpsertMissingAsync<T>(IMongoCollection<T> collection, IEnumerable<T> candidates, Func<T, int> idSelector)
+    {
+        var existingIds = (await collection.Find(_ => true).ToListAsync()).Select(idSelector).ToHashSet();
+        var missing = candidates.Where(c => !existingIds.Contains(idSelector(c))).ToList();
+        if (missing.Count > 0)
+            await collection.InsertManyAsync(missing);
     }
 
     private static async Task SyncCountersAsync(MongoDbContext db)

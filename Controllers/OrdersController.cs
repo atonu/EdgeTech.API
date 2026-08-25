@@ -147,13 +147,27 @@ public class OrdersController : ControllerBase
 
     [HttpGet("all")]
     [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> GetAllOrders([FromQuery] int page = 1, [FromQuery] int pageSize = 20)
+    public async Task<IActionResult> GetAllOrders([FromQuery] string? search, [FromQuery] int page = 1, [FromQuery] int pageSize = 20)
     {
         page = Math.Max(1, page);
         pageSize = Math.Clamp(pageSize, 1, 100);
 
-        var total = (int)await _db.Orders.CountDocumentsAsync(_ => true);
-        var orders = await _db.Orders.Find(_ => true)
+        var filter = Builders<Order>.Filter.Empty;
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            var term = search.Trim();
+            var textFilter = Builders<Order>.Filter.Or(
+                Builders<Order>.Filter.Regex(o => o.CustomerName, new MongoDB.Bson.BsonRegularExpression(term, "i")),
+                Builders<Order>.Filter.Regex(o => o.CustomerEmail, new MongoDB.Bson.BsonRegularExpression(term, "i")),
+                Builders<Order>.Filter.Regex(o => o.CustomerPhone, new MongoDB.Bson.BsonRegularExpression(term, "i"))
+            );
+            filter = int.TryParse(term, out var orderId)
+                ? Builders<Order>.Filter.Or(textFilter, Builders<Order>.Filter.Eq(o => o.Id, orderId))
+                : textFilter;
+        }
+
+        var total = (int)await _db.Orders.CountDocumentsAsync(filter);
+        var orders = await _db.Orders.Find(filter)
             .SortByDescending(o => o.CreatedAt)
             .Skip((page - 1) * pageSize)
             .Limit(pageSize)

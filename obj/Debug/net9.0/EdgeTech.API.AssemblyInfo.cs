@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("EdgeTech.API")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+216e1f267bd99eb1e32e2efd4175e3ca2ec4de7d")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+dfd0e87f572a5777cb49724d78600dba941dce2c")]
 [assembly: System.Reflection.AssemblyProductAttribute("EdgeTech.API")]
 [assembly: System.Reflection.AssemblyTitleAttribute("EdgeTech.API")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

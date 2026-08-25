@@ -13,13 +13,11 @@ namespace EdgeTech.API.Controllers;
 public class ProductsController : ControllerBase
 {
     private readonly MongoDbContext _db;
-    private readonly IBlobStorageService _blob;
     private readonly IIdGeneratorService _ids;
 
-    public ProductsController(MongoDbContext db, IBlobStorageService blob, IIdGeneratorService ids)
+    public ProductsController(MongoDbContext db, IIdGeneratorService ids)
     {
         _db = db;
-        _blob = blob;
         _ids = ids;
     }
 
@@ -259,17 +257,20 @@ public class ProductsController : ControllerBase
 
     [HttpPost("{id}/images")]
     [Authorize(Roles = "Admin")]
-    public async Task<IActionResult> UploadImage(int id, IFormFile file)
+    public async Task<IActionResult> AddImage(int id, [FromBody] AddProductImageRequest req)
     {
+        // Only accept paths the frontend's own uploader produces — never an arbitrary external URL.
+        if (string.IsNullOrWhiteSpace(req.ImageUrl) || !req.ImageUrl.StartsWith("/product-images/"))
+            return BadRequest(new { message = "imageUrl must be a path under /product-images/." });
+
         var product = await _db.Products.Find(p => p.Id == id).FirstOrDefaultAsync();
         if (product == null) return NotFound();
 
-        var url = await _blob.UploadAsync(file, "edgetech-products", $"products/{id}");
         var image = new ProductImage
         {
             Id = await _ids.NextAsync("productImages"),
             ProductId = id,
-            ImageUrl = url,
+            ImageUrl = req.ImageUrl,
             IsPrimary = !product.Images.Any(),
             DisplayOrder = product.Images.Count
         };
@@ -279,6 +280,23 @@ public class ProductsController : ControllerBase
 
         await _db.Products.ReplaceOneAsync(p => p.Id == id, product);
         return Ok(new ProductImageDto(image.Id, image.ImageUrl, image.IsPrimary, image.DisplayOrder));
+    }
+
+    [HttpPatch("{id}/images/{imageId}/primary")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> SetPrimaryImage(int id, int imageId)
+    {
+        var product = await _db.Products.Find(p => p.Id == id).FirstOrDefaultAsync();
+        if (product == null) return NotFound();
+
+        if (!product.Images.Any(i => i.Id == imageId)) return NotFound();
+
+        foreach (var img in product.Images)
+            img.IsPrimary = img.Id == imageId;
+        product.UpdatedAt = DateTime.UtcNow;
+
+        await _db.Products.ReplaceOneAsync(p => p.Id == id, product);
+        return NoContent();
     }
 
     [HttpDelete("{id}/images/{imageId}")]
@@ -291,8 +309,13 @@ public class ProductsController : ControllerBase
         var image = product.Images.FirstOrDefault(i => i.Id == imageId);
         if (image == null) return NotFound();
 
-        await _blob.DeleteAsync(image.ImageUrl);
+        var wasPrimary = image.IsPrimary;
         product.Images = product.Images.Where(i => i.Id != imageId).ToList();
+        if (wasPrimary)
+        {
+            var newPrimary = product.Images.FirstOrDefault();
+            if (newPrimary != null) newPrimary.IsPrimary = true;
+        }
         product.UpdatedAt = DateTime.UtcNow;
 
         await _db.Products.ReplaceOneAsync(p => p.Id == id, product);
@@ -318,6 +341,7 @@ public class ProductsController : ControllerBase
         p.IsFeatured, p.IsActive,
         p.CategoryId, category?.Name ?? "Unknown", category?.Slug ?? string.Empty,
         p.BrandId, brand?.Name ?? "Unknown", brand?.Slug ?? string.Empty,
+        p.Images.FirstOrDefault(i => i.IsPrimary)?.ImageUrl ?? p.Images.FirstOrDefault()?.ImageUrl,
         p.Images.Select(i => new ProductImageDto(i.Id, i.ImageUrl, i.IsPrimary, i.DisplayOrder)).ToList(),
         p.Specifications.OrderBy(s => s.DisplayOrder).Select(s => new ProductSpecDto(s.Id, s.Key, s.Value, s.DisplayOrder)).ToList(),
         p.Reviews.Any() ? p.Reviews.Average(r => r.Rating) : 0,

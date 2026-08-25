@@ -15,12 +15,14 @@ public record ProductDto(
     bool IsFeatured, bool IsActive,
     int CategoryId, string CategoryName, string CategorySlug,
     int BrandId, string BrandName, string BrandSlug,
+    string? PrimaryImageUrl,
     List<ProductImageDto> Images,
     List<ProductSpecDto> Specifications,
     double AverageRating, int ReviewCount,
     DateTime CreatedAt
 );
 public record ProductImageDto(int Id, string ImageUrl, bool IsPrimary, int DisplayOrder);
+public record AddProductImageRequest(string ImageUrl);
 public record ProductSpecDto(int Id, string Key, string Value, int DisplayOrder);
 public record ProductListDto(
     int Id, string Name, string Slug, decimal Price, decimal? DiscountPrice,

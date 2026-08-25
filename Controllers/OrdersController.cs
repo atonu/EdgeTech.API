@@ -72,9 +72,11 @@ public class OrdersController : ControllerBase
 
         var orderId = await _ids.NextAsync("orders");
 
+        var orderNumber = $"ET-{orderId:D6}";
         var order = new Order
         {
             Id = orderId,
+            OrderNumber = orderNumber,
             UserId = userId,
             Status = OrderStatus.Placed,
             CustomerName = req.Customer.FullName,
@@ -83,6 +85,7 @@ public class OrdersController : ControllerBase
             IsGuestOrder = string.IsNullOrWhiteSpace(userId),
             ShippingAddress = JsonSerializer.Serialize(req.ShippingAddress),
             Notes = req.Notes,
+            AdminNotes = null,
             PaymentMethod = req.PaymentMethod,
             TotalAmount = cartItems.Sum(ci => (productMap[ci.ProductId].DiscountPrice ?? productMap[ci.ProductId].Price) * ci.Quantity),
             CreatedAt = DateTime.UtcNow,
@@ -113,7 +116,7 @@ public class OrdersController : ControllerBase
         if (userId != null)
             await _db.CartItems.DeleteManyAsync(ci => ci.UserId == userId);
 
-        return Ok(new { orderId = order.Id });
+        return Ok(new { orderId = order.Id, orderNumber = order.OrderNumber });
     }
 
     [HttpGet]
@@ -159,7 +162,11 @@ public class OrdersController : ControllerBase
             var textFilter = Builders<Order>.Filter.Or(
                 Builders<Order>.Filter.Regex(o => o.CustomerName, new MongoDB.Bson.BsonRegularExpression(term, "i")),
                 Builders<Order>.Filter.Regex(o => o.CustomerEmail, new MongoDB.Bson.BsonRegularExpression(term, "i")),
-                Builders<Order>.Filter.Regex(o => o.CustomerPhone, new MongoDB.Bson.BsonRegularExpression(term, "i"))
+                Builders<Order>.Filter.Regex(o => o.CustomerPhone, new MongoDB.Bson.BsonRegularExpression(term, "i")),
+                Builders<Order>.Filter.Regex(o => o.OrderNumber, new MongoDB.Bson.BsonRegularExpression(term, "i")),
+                Builders<Order>.Filter.Regex(o => o.ShippingAddress, new MongoDB.Bson.BsonRegularExpression(term, "i")),
+                Builders<Order>.Filter.Regex(o => o.Notes, new MongoDB.Bson.BsonRegularExpression(term, "i")),
+                Builders<Order>.Filter.Regex(o => o.AdminNotes, new MongoDB.Bson.BsonRegularExpression(term, "i"))
             );
             filter = int.TryParse(term, out var orderId)
                 ? Builders<Order>.Filter.Or(textFilter, Builders<Order>.Filter.Eq(o => o.Id, orderId))
@@ -199,10 +206,17 @@ public class OrdersController : ControllerBase
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> UpdateOrderAdmin(int id, [FromBody] UpdateOrderAdminRequest req)
     {
+        var adminNotes = req.AdminNotes ?? req.Notes;
         var update = Builders<Order>.Update
             .Set(o => o.Status, req.Status)
-            .Set(o => o.Notes, req.Notes)
+            .Set(o => o.AdminNotes, adminNotes)
             .Set(o => o.UpdatedAt, DateTime.UtcNow);
+
+        if (req.Notes != null)
+        {
+            update = update.Set(o => o.Notes, req.Notes);
+        }
+
         var filter = Builders<Order>.Filter.Eq(o => o.Id, id);
 
         var result = await _db.Orders.FindOneAndUpdateAsync(filter, update, new FindOneAndUpdateOptions<Order, Order>
@@ -211,7 +225,7 @@ public class OrdersController : ControllerBase
         });
 
         if (result == null) return NotFound();
-        return Ok(new { status = result.Status.ToString(), notes = result.Notes });
+        return Ok(new { status = result.Status.ToString(), notes = result.Notes, adminNotes = result.AdminNotes });
     }
 
     private async Task<List<OrderDto>> MapOrdersToDtos(IEnumerable<Order> orders)
@@ -234,13 +248,17 @@ public class OrdersController : ControllerBase
                 address = new ShippingAddressDto("", "", "", "", "", "", "");
             }
 
+            var orderNumber = !string.IsNullOrWhiteSpace(o.OrderNumber) ? o.OrderNumber : $"ET-{o.Id:D6}";
+
             return new OrderDto(
                 o.Id,
+                orderNumber,
                 o.Status,
                 o.TotalAmount,
                 new CustomerInfoDto(o.CustomerName, o.CustomerEmail, o.CustomerPhone),
                 address,
                 o.Notes,
+                o.AdminNotes,
                 o.PaymentMethod,
                 o.CreatedAt,
                 o.Items.Select(i => new OrderItemDto(

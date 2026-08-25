@@ -104,11 +104,31 @@ public class AdminUsersController : ControllerBase
     public AdminUsersController(MongoDbContext db) => _db = db;
 
     [HttpGet]
-    public async Task<IActionResult> GetAll()
+    public async Task<IActionResult> GetAll([FromQuery] int page = 1, [FromQuery] int pageSize = 10, [FromQuery] string? search = null)
     {
-        var users = await _db.Users.Find(_ => true).ToListAsync();
-        var result = users.Select(u => new { u.Id, u.Email, u.FirstName, u.LastName, Role = u.Role, u.CreatedAt });
-        return Ok(result);
+        var filter = Builders<ApplicationUser>.Filter.Empty;
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            var searchLower = search.ToLowerInvariant();
+            filter = Builders<ApplicationUser>.Filter.Or(
+                Builders<ApplicationUser>.Filter.Regex(u => u.Email, searchLower),
+                Builders<ApplicationUser>.Filter.Regex(u => u.FirstName, searchLower),
+                Builders<ApplicationUser>.Filter.Regex(u => u.LastName, searchLower)
+            );
+        }
+
+        var totalCount = (int)await _db.Users.CountDocumentsAsync(filter);
+        var users = await _db.Users.Find(filter)
+            .SortByDescending(u => u.CreatedAt)
+            .Skip((page - 1) * pageSize)
+            .Limit(pageSize)
+            .ToListAsync();
+
+        var dtos = users.Select(u => new UserDto(u.Id, u.Email, u.FirstName, u.LastName, u.Role)).ToList();
+        var totalPages = (int)Math.Ceiling((double)totalCount / pageSize);
+
+        return Ok(new PagedResult<UserDto>(dtos, totalCount, page, pageSize, totalPages));
     }
 
     [HttpPost]
@@ -119,23 +139,42 @@ public class AdminUsersController : ControllerBase
             return BadRequest(new { errors = new[] { "Invalid role" } });
 
         var role = req.Role.Equals("Admin", StringComparison.OrdinalIgnoreCase) ? "Admin" : "User";
-        var existing = await _db.Users.Find(u => u.Email == req.Email.ToLowerInvariant()).FirstOrDefaultAsync();
+        var normalizedEmail = req.Email.ToLowerInvariant();
+        var existing = await _db.Users.Find(u => u.Email == normalizedEmail).FirstOrDefaultAsync();
         if (existing != null) return BadRequest(new { errors = new[] { "Email is already in use" } });
 
         var user = new ApplicationUser
         {
             Id = Guid.NewGuid().ToString("N"),
-            UserName = req.Email.ToLowerInvariant(),
-            Email = req.Email.ToLowerInvariant(),
+            UserName = normalizedEmail,
+            Email = normalizedEmail,
             FirstName = req.FirstName,
             LastName = req.LastName,
             Role = role,
-            EmailConfirmed = true
+            EmailConfirmed = true,
+            CreatedAt = DateTime.UtcNow
         };
         var hasher = new Microsoft.AspNetCore.Identity.PasswordHasher<ApplicationUser>();
         user.PasswordHash = hasher.HashPassword(user, req.Password);
         await _db.Users.InsertOneAsync(user);
-        return Ok(new { user.Id, user.Email });
+        return Ok(new UserDto(user.Id, user.Email, user.FirstName, user.LastName, user.Role));
+    }
+
+    [HttpPut("{id}")]
+    public async Task<IActionResult> UpdateUser(string id, [FromBody] UpdateUserRequest req)
+    {
+        var allowedRoles = new[] { "User", "Admin" };
+        if (!allowedRoles.Contains(req.Role, StringComparer.OrdinalIgnoreCase))
+            return BadRequest(new { errors = new[] { "Invalid role" } });
+
+        var update = Builders<ApplicationUser>.Update
+            .Set(u => u.FirstName, req.FirstName)
+            .Set(u => u.LastName, req.LastName)
+            .Set(u => u.Role, req.Role);
+
+        var result = await _db.Users.UpdateOneAsync(u => u.Id == id, update);
+        if (result.MatchedCount == 0) return NotFound();
+        return NoContent();
     }
 
     [HttpPut("{id}/role")]

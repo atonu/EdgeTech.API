@@ -6,6 +6,7 @@ public record LoginRequest(string Email, string Password);
 public record AuthResponse(string Token, string RefreshToken, DateTime Expires, UserDto User);
 public record UserDto(string Id, string Email, string FirstName, string LastName, string Role);
 public record CreateUserRequest(string Email, string Password, string FirstName, string LastName, string Role);
+public record UpdateUserRequest(string FirstName, string LastName, string Role);
 public record ChangeRoleRequest(string Role);
 
 // Product DTOs
@@ -65,10 +66,10 @@ public record ShippingAddressDto(string FullName, string Phone, string Address, 
 public record CustomerInfoDto(string FullName, string Email, string Phone);
 public record PlaceOrderItemRequest(int ProductId, int Quantity);
 public record PlaceOrderRequest(ShippingAddressDto ShippingAddress, string? Notes, string PaymentMethod, CustomerInfoDto Customer, List<PlaceOrderItemRequest> Items);
-public record OrderDto(int Id, OrderStatus Status, decimal TotalAmount, CustomerInfoDto Customer, ShippingAddressDto ShippingAddress, string? Notes, string? PaymentMethod, DateTime CreatedAt, List<OrderItemDto> Items);
+public record OrderDto(int Id, string? OrderNumber, OrderStatus Status, decimal TotalAmount, CustomerInfoDto Customer, ShippingAddressDto ShippingAddress, string? Notes, string? AdminNotes, string? PaymentMethod, DateTime CreatedAt, List<OrderItemDto> Items);
 public record OrderItemDto(int Id, int ProductId, string ProductName, string? ImageUrl, decimal UnitPrice, int Quantity);
 public record UpdateOrderStatusRequest(OrderStatus Status);
-public record UpdateOrderAdminRequest(OrderStatus Status, string? Notes);
+public record UpdateOrderAdminRequest(OrderStatus Status, string? Notes, string? AdminNotes);
 
 // Review DTOs
 public record CreateReviewRequest(int Rating, string? Comment);

@@ -30,6 +30,6 @@ jobs:
             docker run -d \
               --name edgetech-api-container \
               --restart unless-stopped \
-              -p 5000:5000 \
+              -p 5001:5001 \
               -e Frontend__Url=https://edgetech.com.bd,https://www.edgetech.com.bd,http://localhost:3000 \
               edgetech-api:latest

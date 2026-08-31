@@ -40,12 +40,13 @@ builder.Services.AddScoped<IBlobStorageService, BlobStorageService>();
 builder.Services.AddScoped<IIdGeneratorService, IdGeneratorService>();
 
 // CORS
+var frontendOrigins = (builder.Configuration["Frontend:Url"] ?? "http://localhost:3000")
+    .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
-        policy.WithOrigins(
-            builder.Configuration["Frontend:Url"] ?? "http://localhost:3000"
-        )
+        policy.WithOrigins(frontendOrigins)
         .AllowAnyMethod()
         .AllowAnyHeader()
         .AllowCredentials());

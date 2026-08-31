@@ -31,5 +31,5 @@ jobs:
               --name edgetech-api-container \
               --restart unless-stopped \
               -p 5000:5000 \
-              -e Frontend__Url=http://${{ secrets.OCI_HOST }}:3000 \
+              -e Frontend__Url=http://${{ secrets.OCI_HOST }}:3000,http://localhost:3000 \
               edgetech-api:latest

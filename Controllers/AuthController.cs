@@ -27,20 +27,23 @@ public class AuthController : ControllerBase
     [HttpPost("register")]
     public async Task<IActionResult> Register([FromBody] RegisterRequest req)
     {
+        if (req == null || string.IsNullOrWhiteSpace(req.Email) || string.IsNullOrWhiteSpace(req.Password))
+            return BadRequest(new { message = "Email and password are required.", errors = new[] { "Email and password are required." } });
+
         var normalizedEmail = req.Email.Trim().ToLowerInvariant();
         if (normalizedEmail == "admin@edgetech.com")
-            return BadRequest(new { errors = new[] { "This account cannot be registered publicly" } });
+            return BadRequest(new { message = "This account cannot be registered publicly.", errors = new[] { "This account cannot be registered publicly." } });
 
         var existing = await _db.Users.Find(u => u.Email == normalizedEmail).FirstOrDefaultAsync();
         if (existing != null)
-            return BadRequest(new { errors = new[] { "Email is already in use" } });
+            return BadRequest(new { message = "Email is already in use.", errors = new[] { "Email is already in use." } });
 
         var user = new ApplicationUser
         {
             UserName = normalizedEmail,
             Email = normalizedEmail,
-            FirstName = req.FirstName,
-            LastName = req.LastName,
+            FirstName = (req.FirstName ?? "").Trim(),
+            LastName = (req.LastName ?? "").Trim(),
             Role = "User",
             EmailConfirmed = true
         };

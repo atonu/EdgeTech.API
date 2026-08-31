@@ -24,7 +24,7 @@ jobs:
             cd ~/apps/EdgeTech.API
             git reset --hard HEAD
             git pull origin main
-            docker build -t edgetech-api:latest .
+            docker build --no-cache -t edgetech-api:latest .
             docker stop edgetech-api-container || true
             docker rm edgetech-api-container || true
             docker run -d \

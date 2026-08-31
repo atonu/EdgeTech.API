@@ -1,10 +1,32 @@
 using System.Text;
 using System.Text.Json.Serialization;
 using EdgeTech.API.Data;
+using EdgeTech.API.Models;
 using EdgeTech.API.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using MongoDB.Bson.Serialization;
+using MongoDB.Bson.Serialization.Conventions;
+
+// 1. Configure MongoDB Global Conventions & ClassMaps before any Mongo operations
+var conventionPack = new ConventionPack
+{
+    new IgnoreExtraElementsConvention(true),
+    new IgnoreIfNullConvention(true)
+};
+ConventionRegistry.Register("GlobalConventions", conventionPack, t => true);
+
+foreach (var type in typeof(Order).Assembly.GetTypes().Where(t => t.Namespace == "EdgeTech.API.Models" && t.IsClass))
+{
+    if (!BsonClassMap.IsClassMapRegistered(type))
+    {
+        var classMap = new BsonClassMap(type);
+        classMap.AutoMap();
+        classMap.SetIgnoreExtraElements(true);
+        BsonClassMap.RegisterClassMap(classMap);
+    }
+}
 
 var builder = WebApplication.CreateBuilder(args);
 

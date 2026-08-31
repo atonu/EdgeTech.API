@@ -1,5 +1,8 @@
+using MongoDB.Bson.Serialization.Attributes;
+
 namespace EdgeTech.API.Models;
 
+[BsonIgnoreExtraElements]
 public class ApplicationUser
 {
     public string Id { get; set; } = Guid.NewGuid().ToString("N");

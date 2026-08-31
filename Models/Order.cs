@@ -1,7 +1,9 @@
 using System.Text.Json;
+using MongoDB.Bson.Serialization.Attributes;
 
 namespace EdgeTech.API.Models;
 
+[BsonIgnoreExtraElements]
 public class Order
 {
     public int Id { get; set; }

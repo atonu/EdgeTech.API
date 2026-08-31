@@ -1,5 +1,8 @@
+using MongoDB.Bson.Serialization.Attributes;
+
 namespace EdgeTech.API.Models;
 
+[BsonIgnoreExtraElements]
 public class PackageBuild
 {
     public int Id { get; set; }

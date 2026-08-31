@@ -1,10 +1,20 @@
 using EdgeTech.API.Models;
+using MongoDB.Bson.Serialization.Conventions;
 using MongoDB.Driver;
 
 namespace EdgeTech.API.Data;
 
 public class MongoDbContext
 {
+    static MongoDbContext()
+    {
+        var pack = new ConventionPack
+        {
+            new IgnoreExtraElementsConvention(true)
+        };
+        ConventionRegistry.Register("GlobalConventions", pack, t => true);
+    }
+
     public IMongoDatabase Database { get; }
 
     public MongoDbContext(IConfiguration configuration)

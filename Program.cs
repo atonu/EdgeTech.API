@@ -40,16 +40,35 @@ builder.Services.AddScoped<IBlobStorageService, BlobStorageService>();
 builder.Services.AddScoped<IIdGeneratorService, IdGeneratorService>();
 
 // CORS
-var frontendOrigins = (builder.Configuration["Frontend:Url"] ?? "http://localhost:3000")
+var configuredOrigins = (builder.Configuration["Frontend:Url"] ?? "http://localhost:3000,http://localhost:3001,https://edgetech.com.bd,https://www.edgetech.com.bd")
     .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
 
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
-        policy.WithOrigins(frontendOrigins)
+    {
+        policy.SetIsOriginAllowed(origin =>
+        {
+            if (string.IsNullOrWhiteSpace(origin)) return false;
+            try
+            {
+                var uri = new Uri(origin);
+                return uri.Host.Equals("localhost", StringComparison.OrdinalIgnoreCase) ||
+                       uri.Host.Equals("127.0.0.1", StringComparison.OrdinalIgnoreCase) ||
+                       uri.Host.Equals("edgetech.com.bd", StringComparison.OrdinalIgnoreCase) ||
+                       uri.Host.EndsWith(".edgetech.com.bd", StringComparison.OrdinalIgnoreCase) ||
+                       uri.Host.EndsWith(".vercel.app", StringComparison.OrdinalIgnoreCase) ||
+                       configuredOrigins.Any(o => o.TrimEnd('/').Equals(origin.TrimEnd('/'), StringComparison.OrdinalIgnoreCase));
+            }
+            catch
+            {
+                return false;
+            }
+        })
         .AllowAnyMethod()
         .AllowAnyHeader()
-        .AllowCredentials());
+        .AllowCredentials();
+    });
 });
 
 builder.Services.AddControllers()

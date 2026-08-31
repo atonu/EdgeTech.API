@@ -106,7 +106,8 @@ using (var scope = app.Services.CreateScope())
 app.UseSwagger();
 app.UseSwaggerUI();
 
-app.UseHttpsRedirection();
+// Behind reverse proxies like Cloudflare, SSL is terminated at the edge.
+// app.UseHttpsRedirection() is omitted to prevent 301 redirect loops.
 app.UseCors("AllowFrontend");
 app.UseAuthentication();
 app.UseAuthorization();

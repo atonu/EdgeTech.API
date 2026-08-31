@@ -24,11 +24,13 @@ jobs:
             cd ~/apps/EdgeTech.API
             git reset --hard HEAD
             git pull origin main
+            docker network create edgetech-net || true
             docker build --no-cache -t edgetech-api:latest .
             docker stop edgetech-api-container || true
             docker rm edgetech-api-container || true
             docker run -d \
               --name edgetech-api-container \
+              --network edgetech-net \
               --restart unless-stopped \
               -p 5001:5001 \
               -e Frontend__Url=https://edgetech.com.bd,https://www.edgetech.com.bd,http://localhost:3000 \

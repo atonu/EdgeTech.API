@@ -27,14 +27,40 @@ public class BlobStorageService : IBlobStorageService
         var containerClient = _client.Value.GetBlobContainerClient(_containerName);
         await containerClient.CreateIfNotExistsAsync(PublicAccessType.Blob);
 
+        var isImage = file.ContentType.StartsWith("image/", StringComparison.OrdinalIgnoreCase);
+
+        if (isImage)
+        {
+            try
+            {
+                using var inStream = file.OpenReadStream();
+                using var image = await SixLabors.ImageSharp.Image.LoadAsync(inStream);
+                using var outStream = new MemoryStream();
+                await image.SaveAsync(outStream, new SixLabors.ImageSharp.Formats.Webp.WebpEncoder
+                {
+                    Quality = 85
+                });
+                outStream.Position = 0;
+
+                var blobName = $"{folder}/{Guid.NewGuid()}.webp";
+                var blobClient = containerClient.GetBlobClient(blobName);
+                await blobClient.UploadAsync(outStream, new BlobHttpHeaders { ContentType = "image/webp" });
+                return blobClient.Uri.ToString();
+            }
+            catch
+            {
+                // Fallback to original stream if ImageSharp cannot process
+            }
+        }
+
         var extension = Path.GetExtension(file.FileName);
-        var blobName = $"{folder}/{Guid.NewGuid()}{extension}";
-        var blobClient = containerClient.GetBlobClient(blobName);
+        var fallbackBlobName = $"{folder}/{Guid.NewGuid()}{extension}";
+        var fallbackBlobClient = containerClient.GetBlobClient(fallbackBlobName);
 
         using var stream = file.OpenReadStream();
-        await blobClient.UploadAsync(stream, new BlobHttpHeaders { ContentType = file.ContentType });
+        await fallbackBlobClient.UploadAsync(stream, new BlobHttpHeaders { ContentType = file.ContentType });
 
-        return blobClient.Uri.ToString();
+        return fallbackBlobClient.Uri.ToString();
     }
 
     public async Task DeleteAsync(string blobUrl)

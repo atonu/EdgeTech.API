@@ -65,11 +65,43 @@ public record UpdateCartItemRequest(int Quantity);
 public record ShippingAddressDto(string FullName, string Phone, string Address, string City, string State, string PostalCode, string Country);
 public record CustomerInfoDto(string FullName, string Email, string Phone);
 public record PlaceOrderItemRequest(int ProductId, int Quantity);
-public record PlaceOrderRequest(ShippingAddressDto ShippingAddress, string? Notes, string PaymentMethod, CustomerInfoDto Customer, List<PlaceOrderItemRequest> Items);
-public record OrderDto(int Id, string? OrderNumber, OrderStatus Status, decimal TotalAmount, CustomerInfoDto Customer, ShippingAddressDto ShippingAddress, string? Notes, string? AdminNotes, string? PaymentMethod, DateTime CreatedAt, List<OrderItemDto> Items);
+public record PlaceOrderRequest(
+    ShippingAddressDto ShippingAddress,
+    string? Notes,
+    string PaymentMethod,
+    CustomerInfoDto Customer,
+    List<PlaceOrderItemRequest> Items,
+    bool IsEmi = false,
+    int? EmiTenureMonths = null,
+    string? EmiBank = null
+);
+public record OrderDto(
+    int Id,
+    string? OrderNumber,
+    OrderStatus Status,
+    decimal TotalAmount,
+    CustomerInfoDto Customer,
+    ShippingAddressDto ShippingAddress,
+    string? Notes,
+    string? AdminNotes,
+    string? PaymentMethod,
+    DateTime CreatedAt,
+    List<OrderItemDto> Items,
+    bool IsEmi = false,
+    int? EmiTenureMonths = null,
+    int EmiCompletedMonths = 0,
+    decimal? EmiMonthlyAmount = null,
+    string? EmiBank = null
+);
 public record OrderItemDto(int Id, int ProductId, string ProductName, string? ImageUrl, decimal UnitPrice, int Quantity);
 public record UpdateOrderStatusRequest(OrderStatus Status);
-public record UpdateOrderAdminRequest(OrderStatus Status, string? Notes, string? AdminNotes);
+public record UpdateOrderAdminRequest(
+    OrderStatus Status,
+    string? Notes,
+    string? AdminNotes,
+    int? EmiCompletedMonths = null,
+    int? EmiTenureMonths = null
+);
 
 // Review DTOs
 public record CreateReviewRequest(int Rating, string? Comment);

@@ -73,6 +73,13 @@ public class OrdersController : ControllerBase
         var orderId = await _ids.NextAsync("orders");
 
         var orderNumber = $"ET-{orderId:D6}";
+        var totalAmount = cartItems.Sum(ci => (productMap[ci.ProductId].DiscountPrice ?? productMap[ci.ProductId].Price) * ci.Quantity);
+        var isEmi = req.IsEmi || (req.PaymentMethod != null && req.PaymentMethod.Equals("emi", StringComparison.OrdinalIgnoreCase));
+        var tenureMonths = req.EmiTenureMonths ?? (isEmi ? 12 : null);
+        var monthlyAmount = isEmi && tenureMonths.HasValue && tenureMonths.Value > 0
+            ? Math.Round(totalAmount / tenureMonths.Value, 2)
+            : (decimal?)null;
+
         var order = new Order
         {
             Id = orderId,
@@ -87,7 +94,12 @@ public class OrdersController : ControllerBase
             Notes = req.Notes,
             AdminNotes = null,
             PaymentMethod = req.PaymentMethod,
-            TotalAmount = cartItems.Sum(ci => (productMap[ci.ProductId].DiscountPrice ?? productMap[ci.ProductId].Price) * ci.Quantity),
+            IsEmi = isEmi,
+            EmiTenureMonths = tenureMonths,
+            EmiCompletedMonths = 0,
+            EmiMonthlyAmount = monthlyAmount,
+            EmiBank = req.EmiBank,
+            TotalAmount = totalAmount,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow,
             Items = []
@@ -217,6 +229,16 @@ public class OrdersController : ControllerBase
             update = update.Set(o => o.Notes, req.Notes);
         }
 
+        if (req.EmiCompletedMonths.HasValue)
+        {
+            update = update.Set(o => o.EmiCompletedMonths, req.EmiCompletedMonths.Value);
+        }
+
+        if (req.EmiTenureMonths.HasValue)
+        {
+            update = update.Set(o => o.EmiTenureMonths, req.EmiTenureMonths.Value);
+        }
+
         var filter = Builders<Order>.Filter.Eq(o => o.Id, id);
 
         var result = await _db.Orders.FindOneAndUpdateAsync(filter, update, new FindOneAndUpdateOptions<Order, Order>
@@ -225,7 +247,15 @@ public class OrdersController : ControllerBase
         });
 
         if (result == null) return NotFound();
-        return Ok(new { status = result.Status.ToString(), notes = result.Notes, adminNotes = result.AdminNotes });
+        return Ok(new {
+            status = result.Status.ToString(),
+            notes = result.Notes,
+            adminNotes = result.AdminNotes,
+            isEmi = result.IsEmi,
+            emiCompletedMonths = result.EmiCompletedMonths,
+            emiTenureMonths = result.EmiTenureMonths,
+            emiMonthlyAmount = result.EmiMonthlyAmount
+        });
     }
 
     private async Task<List<OrderDto>> MapOrdersToDtos(IEnumerable<Order> orders)
@@ -269,7 +299,12 @@ public class OrdersController : ControllerBase
                         ?? productMap.GetValueOrDefault(i.ProductId)?.Images.FirstOrDefault()?.ImageUrl,
                     i.UnitPrice,
                     i.Quantity
-                )).ToList()
+                )).ToList(),
+                o.IsEmi,
+                o.EmiTenureMonths,
+                o.EmiCompletedMonths,
+                o.EmiMonthlyAmount,
+                o.EmiBank
             );
         }).ToList();
     }

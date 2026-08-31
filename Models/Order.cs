@@ -18,6 +18,11 @@ public class Order
     public string? AdminNotes { get; set; }
     public string? PaymentMethod { get; set; }
     public string? TransactionId { get; set; }
+    public bool IsEmi { get; set; }
+    public int? EmiTenureMonths { get; set; }
+    public int EmiCompletedMonths { get; set; }
+    public decimal? EmiMonthlyAmount { get; set; }
+    public string? EmiBank { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 

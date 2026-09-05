@@ -130,3 +130,35 @@ public record UpdateProductGroupRequest(string Name, bool IsActive, List<int> Pr
 
 // Upload
 public record UploadResponse(string Url);
+
+// Feedback & Support DTOs
+public record CreateFeedbackRequest(
+    string? Name,
+    string? Email,
+    string? Phone,
+    string? Category,
+    string Subject,
+    string Message,
+    int? Rating
+);
+
+public record FeedbackDto(
+    int Id,
+    string? Name,
+    string? Email,
+    string? Phone,
+    string Category,
+    string Subject,
+    string Message,
+    int? Rating,
+    string Status,
+    string? AdminNotes,
+    DateTime CreatedAt,
+    DateTime? UpdatedAt
+);
+
+public record UpdateFeedbackStatusRequest(
+    string Status,
+    string? AdminNotes
+);
+

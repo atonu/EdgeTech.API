@@ -57,6 +57,8 @@ public static class MongoDbInitializer
 
         await db.Orders.Indexes.CreateOneAsync(new CreateIndexModel<Order>(Builders<Order>.IndexKeys.Ascending(o => o.UserId)));
         await db.PackageBuilds.Indexes.CreateOneAsync(new CreateIndexModel<PackageBuild>(Builders<PackageBuild>.IndexKeys.Ascending(p => p.UserId)));
+        await db.PolicyPages.Indexes.CreateOneAsync(
+            new CreateIndexModel<PolicyPage>(Builders<PolicyPage>.IndexKeys.Ascending(p => p.Slug), new CreateIndexOptions { Unique = true }));
     }
 
     private static async Task SeedAsync(MongoDbContext db)
@@ -317,6 +319,8 @@ public static class MongoDbInitializer
         {
             await db.ProductGroups.ReplaceOneAsync(g => g.Key == group.Key, group, new ReplaceOptions { IsUpsert = true });
         }
+
+        await PolicyPagesSeed.SeedAsync(db);
 
         await SyncCountersAsync(db);
     }

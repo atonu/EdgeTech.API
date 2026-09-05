@@ -40,4 +40,5 @@ public class MongoDbContext
     public IMongoCollection<PackageBuild> PackageBuilds => Database.GetCollection<PackageBuild>("packageBuilds");
     public IMongoCollection<RecentlyViewed> RecentlyViewed => Database.GetCollection<RecentlyViewed>("recentlyViewed");
     public IMongoCollection<Counter> Counters => Database.GetCollection<Counter>("counters");
+    public IMongoCollection<PolicyPage> PolicyPages => Database.GetCollection<PolicyPage>("policyPages");
 }

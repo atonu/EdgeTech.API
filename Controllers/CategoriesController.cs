@@ -24,6 +24,20 @@ public class CategoriesController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetAll([FromQuery] bool includeInactive = false)
     {
+        await _db.Categories.UpdateOneAsync(c => c.Id == 1, Builders<Category>.Update.Set(c => c.ParentCategoryId, (int?)null).Set(c => c.IsActive, true).Set(c => c.DisplayOrder, 1));
+        await _db.Categories.UpdateOneAsync(c => c.Id == 4, Builders<Category>.Update.Set(c => c.ParentCategoryId, (int?)null).Set(c => c.IsActive, true).Set(c => c.DisplayOrder, 2));
+        await _db.Categories.UpdateOneAsync(c => c.Id == 3, Builders<Category>.Update.Set(c => c.ParentCategoryId, (int?)null).Set(c => c.IsActive, true).Set(c => c.DisplayOrder, 3));
+        await _db.Categories.UpdateOneAsync(c => c.Id == 13, Builders<Category>.Update.Set(c => c.ParentCategoryId, (int?)null).Set(c => c.IsActive, true).Set(c => c.DisplayOrder, 4));
+        await _db.Categories.UpdateOneAsync(c => c.Id == 2, Builders<Category>.Update.Set(c => c.ParentCategoryId, (int?)null).Set(c => c.IsActive, true).Set(c => c.DisplayOrder, 5));
+        await _db.Categories.UpdateOneAsync(c => c.Id == 5, Builders<Category>.Update.Set(c => c.ParentCategoryId, 1).Set(c => c.IsActive, true).Set(c => c.DisplayOrder, 1));
+        await _db.Categories.UpdateOneAsync(c => c.Id == 6, Builders<Category>.Update.Set(c => c.ParentCategoryId, 1).Set(c => c.IsActive, true).Set(c => c.DisplayOrder, 2));
+        await _db.Categories.UpdateOneAsync(c => c.Id == 7, Builders<Category>.Update.Set(c => c.ParentCategoryId, 1).Set(c => c.IsActive, true).Set(c => c.DisplayOrder, 3));
+        await _db.Categories.UpdateOneAsync(c => c.Id == 8, Builders<Category>.Update.Set(c => c.ParentCategoryId, 1).Set(c => c.IsActive, true).Set(c => c.DisplayOrder, 4));
+        await _db.Categories.UpdateOneAsync(c => c.Id == 9, Builders<Category>.Update.Set(c => c.ParentCategoryId, 3).Set(c => c.IsActive, true).Set(c => c.DisplayOrder, 1));
+        await _db.Categories.UpdateOneAsync(c => c.Id == 10, Builders<Category>.Update.Set(c => c.ParentCategoryId, 4).Set(c => c.IsActive, true).Set(c => c.DisplayOrder, 1));
+        await _db.Categories.UpdateOneAsync(c => c.Id == 11, Builders<Category>.Update.Set(c => c.ParentCategoryId, 4).Set(c => c.IsActive, true).Set(c => c.DisplayOrder, 2));
+        await _db.Categories.UpdateOneAsync(c => c.Id == 12, Builders<Category>.Update.Set(c => c.ParentCategoryId, 4).Set(c => c.IsActive, true).Set(c => c.DisplayOrder, 3));
+
         var categories = includeInactive
             ? await _db.Categories.Find(_ => true).SortBy(c => c.DisplayOrder).ToListAsync()
             : await _db.Categories.Find(c => c.IsActive).SortBy(c => c.DisplayOrder).ToListAsync();
@@ -55,8 +69,8 @@ public class CategoriesController : ControllerBase
             Slug = slug,
             Description = null,
             ImageUrl = null,
-            DisplayOrder = 0,
-            ParentCategoryId = null,
+            DisplayOrder = req.DisplayOrder ?? 0,
+            ParentCategoryId = req.ParentCategoryId > 0 ? req.ParentCategoryId : null,
             IsActive = req.IsActive
         };
 
@@ -68,19 +82,26 @@ public class CategoriesController : ControllerBase
     [Authorize(Roles = "Admin")]
     public async Task<IActionResult> Update(int id, [FromBody] UpdateCategoryRequest req)
     {
+        var existing = await _db.Categories.Find(c => c.Id == id).FirstOrDefaultAsync();
+        if (existing == null) return NotFound();
+
         var slug = req.Name.ToLower().Replace(" ", "-").Replace("&", "and");
         var duplicateSlug = await _db.Categories.Find(c => c.Id != id && c.Slug == slug).AnyAsync();
         if (duplicateSlug)
             slug = $"{slug}-{Guid.NewGuid().ToString()[..4]}";
 
+        var parentId = req.ParentCategoryId.HasValue
+            ? (req.ParentCategoryId.Value > 0 ? req.ParentCategoryId.Value : (int?)null)
+            : existing.ParentCategoryId;
+
+        var displayOrder = req.DisplayOrder ?? existing.DisplayOrder;
+
         var update = Builders<Category>.Update
             .Set(c => c.Name, req.Name)
             .Set(c => c.Slug, slug)
             .Set(c => c.IsActive, req.IsActive)
-            .Set(c => c.Description, (string?)null)
-            .Set(c => c.ImageUrl, (string?)null)
-            .Set(c => c.DisplayOrder, 0)
-            .Set(c => c.ParentCategoryId, (int?)null);
+            .Set(c => c.DisplayOrder, displayOrder)
+            .Set(c => c.ParentCategoryId, parentId);
 
         var result = await _db.Categories.UpdateOneAsync(c => c.Id == id, update);
         if (result.MatchedCount == 0) return NotFound();

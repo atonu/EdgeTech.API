@@ -42,4 +42,6 @@ public class MongoDbContext
     public IMongoCollection<RecentlyViewed> RecentlyViewed => Database.GetCollection<RecentlyViewed>("recentlyViewed");
     public IMongoCollection<Counter> Counters => Database.GetCollection<Counter>("counters");
     public IMongoCollection<PolicyPage> PolicyPages => Database.GetCollection<PolicyPage>("policyPages");
+    public IMongoCollection<Feedback> Feedbacks => Database.GetCollection<Feedback>("feedbacks");
+    public IMongoCollection<HeroCarousel> HeroCarousels => Database.GetCollection<HeroCarousel>("heroCarousel");
 }

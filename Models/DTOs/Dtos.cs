@@ -47,8 +47,8 @@ public record ToggleFeaturedRequest(bool IsFeatured);
 
 // Category DTOs
 public record CategoryDto(int Id, string Name, string Slug, string? Description, string? ImageUrl, int DisplayOrder, bool IsActive, int? ParentCategoryId, List<CategoryDto>? SubCategories);
-public record CreateCategoryRequest(string Name, bool IsActive);
-public record UpdateCategoryRequest(string Name, bool IsActive);
+public record CreateCategoryRequest(string Name, bool IsActive, int? ParentCategoryId = null, int? DisplayOrder = null);
+public record UpdateCategoryRequest(string Name, bool IsActive, int? ParentCategoryId = null, int? DisplayOrder = null);
 
 // Brand DTOs
 public record BrandDto(int Id, string Name, string Slug, string? LogoUrl, string? Description, bool IsActive);
@@ -145,3 +145,35 @@ public record UpdateProductGroupRequest(string Name, bool IsActive, List<int> Pr
 
 // Upload
 public record UploadResponse(string Url);
+
+// Feedback & Support DTOs
+public record CreateFeedbackRequest(
+    string? Name,
+    string? Email,
+    string? Phone,
+    string? Category,
+    string Subject,
+    string Message,
+    int? Rating
+);
+
+public record FeedbackDto(
+    int Id,
+    string? Name,
+    string? Email,
+    string? Phone,
+    string Category,
+    string Subject,
+    string Message,
+    int? Rating,
+    string Status,
+    string? AdminNotes,
+    DateTime CreatedAt,
+    DateTime? UpdatedAt
+);
+
+public record UpdateFeedbackStatusRequest(
+    string Status,
+    string? AdminNotes
+);
+

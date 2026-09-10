@@ -10,7 +10,11 @@ public class Package
     public int Id { get; set; }
     public string Name { get; set; } = string.Empty;
     public string? Description { get; set; }
+    public string? ImageUrl { get; set; }
     public bool IsActive { get; set; } = true;
+
+    // When true the package is surfaced in the storefront "Best Selling" row alongside products.
+    public bool IsFeatured { get; set; }
 
     // RegularPrice is a snapshot of the components' individual prices at save time (sum of discount ?? price).
     // PackagePrice is the admin's discounted bundle price shown to the customer.

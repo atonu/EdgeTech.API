@@ -77,7 +77,9 @@ public class AdminPackagesController : ControllerBase
             Id = await _ids.NextAsync("packages"),
             Name = req.Name,
             Description = req.Description,
+            ImageUrl = req.ImageUrl,
             IsActive = req.IsActive,
+            IsFeatured = req.IsFeatured,
             PackagePrice = req.PackagePrice,
             // Honour an admin-set regular price; fall back to the summed component prices.
             RegularPrice = req.RegularPrice > 0 ? req.RegularPrice : await ComputeRegularPriceAsync(items),
@@ -101,7 +103,9 @@ public class AdminPackagesController : ControllerBase
         var update = Builders<Package>.Update
             .Set(p => p.Name, req.Name)
             .Set(p => p.Description, req.Description)
+            .Set(p => p.ImageUrl, req.ImageUrl)
             .Set(p => p.IsActive, req.IsActive)
+            .Set(p => p.IsFeatured, req.IsFeatured)
             .Set(p => p.PackagePrice, req.PackagePrice)
             .Set(p => p.RegularPrice, req.RegularPrice > 0 ? req.RegularPrice : await ComputeRegularPriceAsync(items))
             .Set(p => p.Items, items)
@@ -158,7 +162,9 @@ internal static class PackageMapper
             pkg.Id,
             pkg.Name,
             pkg.Description,
+            pkg.ImageUrl,
             pkg.IsActive,
+            pkg.IsFeatured,
             pkg.RegularPrice,
             pkg.PackagePrice,
             pkg.Items.Select(i =>

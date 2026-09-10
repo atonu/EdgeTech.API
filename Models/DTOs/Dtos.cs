@@ -119,12 +119,12 @@ public record SaveComponentRequest(string SlotKey, int ProductId, int Quantity);
 // Admin Package (bundle) DTOs
 public record PackageItemDto(string SlotKey, int ProductId, string ProductName, string? ImageUrl, decimal UnitPrice, int Quantity, int Stock);
 public record PackageDto(
-    int Id, string Name, string? Description, bool IsActive,
+    int Id, string Name, string? Description, string? ImageUrl, bool IsActive, bool IsFeatured,
     decimal RegularPrice, decimal PackagePrice,
     List<PackageItemDto> Items, DateTime UpdatedAt);
 public record SavePackageItemRequest(string SlotKey, int ProductId, int Quantity);
-public record CreatePackageRequest(string Name, string? Description, bool IsActive, decimal RegularPrice, decimal PackagePrice, List<SavePackageItemRequest> Items);
-public record UpdatePackageRequest(string Name, string? Description, bool IsActive, decimal RegularPrice, decimal PackagePrice, List<SavePackageItemRequest> Items);
+public record CreatePackageRequest(string Name, string? Description, string? ImageUrl, bool IsActive, bool IsFeatured, decimal RegularPrice, decimal PackagePrice, List<SavePackageItemRequest> Items);
+public record UpdatePackageRequest(string Name, string? Description, string? ImageUrl, bool IsActive, bool IsFeatured, decimal RegularPrice, decimal PackagePrice, List<SavePackageItemRequest> Items);
 public record PlaceOrderPackageRequest(int PackageId, int Quantity);
 public record OrderPackageItemDto(int ProductId, string ProductName, string? ImageUrl, int Quantity, decimal UnitPrice);
 public record OrderPackageDto(int PackageId, string Name, decimal RegularPrice, decimal PackagePrice, int Quantity, List<OrderPackageItemDto> Items);

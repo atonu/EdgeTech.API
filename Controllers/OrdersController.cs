@@ -31,6 +31,10 @@ public class OrdersController : ControllerBase
     {
         var userId = UserId;
 
+        var packageRequests = (req.Packages ?? [])
+            .Where(p => p.Quantity > 0)
+            .ToList();
+
         List<CartItem> cartItems;
         if (req.Items != null && req.Items.Count > 0)
         {
@@ -39,31 +43,54 @@ public class OrdersController : ControllerBase
                 .Select(i => new CartItem { ProductId = i.ProductId, Quantity = i.Quantity, UserId = userId ?? "guest" })
                 .ToList();
         }
-        else
+        else if (userId != null && packageRequests.Count == 0)
         {
-            if (userId == null)
-                return BadRequest(new { message = "Guest orders must include items" });
-
+            // Only fall back to the persisted server cart when the client sent neither items nor packages.
             cartItems = await _db.CartItems.Find(ci => ci.UserId == userId).ToListAsync();
         }
+        else
+        {
+            cartItems = [];
+        }
 
-        if (!cartItems.Any()) return BadRequest(new { message = "Cart is empty" });
+        if (!cartItems.Any() && packageRequests.Count == 0)
+            return BadRequest(new { message = "Cart is empty" });
 
-        var productIds = cartItems.Select(ci => ci.ProductId).Distinct().ToList();
+        // Resolve and validate the selected bundle packages.
+        var packageIds = packageRequests.Select(p => p.PackageId).Distinct().ToList();
+        var packages = await _db.Packages.Find(p => packageIds.Contains(p.Id)).ToListAsync();
+        var packageMap = packages.ToDictionary(p => p.Id);
+
+        foreach (var pr in packageRequests)
+        {
+            if (!packageMap.TryGetValue(pr.PackageId, out var pkg) || !pkg.IsActive)
+                return BadRequest(new { message = $"Package #{pr.PackageId} is no longer available" });
+        }
+
+        // Aggregate the required quantity for every product across standalone items and package components,
+        // so stock is validated (and decremented) once per product even when it appears in several places.
+        var requiredQuantities = new Dictionary<int, int>();
+        foreach (var ci in cartItems)
+            requiredQuantities[ci.ProductId] = requiredQuantities.GetValueOrDefault(ci.ProductId) + ci.Quantity;
+        foreach (var pr in packageRequests)
+            foreach (var item in packageMap[pr.PackageId].Items)
+                requiredQuantities[item.ProductId] = requiredQuantities.GetValueOrDefault(item.ProductId) + item.Quantity * pr.Quantity;
+
+        var productIds = requiredQuantities.Keys.ToList();
         var products = await _db.Products.Find(p => productIds.Contains(p.Id)).ToListAsync();
         var productMap = products.ToDictionary(p => p.Id);
 
-        var outOfStock = cartItems
-            .Where(ci => !productMap.ContainsKey(ci.ProductId)
-                         || !productMap[ci.ProductId].IsActive
-                         || ci.Quantity > productMap[ci.ProductId].Stock)
-            .Select(ci => new
+        var outOfStock = requiredQuantities
+            .Where(kv => !productMap.ContainsKey(kv.Key)
+                         || !productMap[kv.Key].IsActive
+                         || kv.Value > productMap[kv.Key].Stock)
+            .Select(kv => new
             {
-                ci.ProductId,
-                Name = productMap.ContainsKey(ci.ProductId) ? productMap[ci.ProductId].Name : "Unknown",
-                requested = ci.Quantity,
-                available = productMap.ContainsKey(ci.ProductId) ? productMap[ci.ProductId].Stock : 0,
-                isActive = productMap.ContainsKey(ci.ProductId) && productMap[ci.ProductId].IsActive
+                ProductId = kv.Key,
+                Name = productMap.ContainsKey(kv.Key) ? productMap[kv.Key].Name : "Unknown",
+                requested = kv.Value,
+                available = productMap.ContainsKey(kv.Key) ? productMap[kv.Key].Stock : 0,
+                isActive = productMap.ContainsKey(kv.Key) && productMap[kv.Key].IsActive
             })
             .ToList();
 
@@ -73,7 +100,9 @@ public class OrdersController : ControllerBase
         var orderId = await _ids.NextAsync("orders");
 
         var orderNumber = $"ET-{orderId:D6}";
-        var totalAmount = cartItems.Sum(ci => (productMap[ci.ProductId].DiscountPrice ?? productMap[ci.ProductId].Price) * ci.Quantity);
+        var standaloneTotal = cartItems.Sum(ci => (productMap[ci.ProductId].DiscountPrice ?? productMap[ci.ProductId].Price) * ci.Quantity);
+        var packagesTotal = packageRequests.Sum(pr => packageMap[pr.PackageId].PackagePrice * pr.Quantity);
+        var totalAmount = standaloneTotal + packagesTotal;
         var isEmi = req.IsEmi || (req.PaymentMethod != null && req.PaymentMethod.Equals("emi", StringComparison.OrdinalIgnoreCase));
         var tenureMonths = req.EmiTenureMonths ?? (isEmi ? 12 : null);
         var monthlyAmount = isEmi && tenureMonths.HasValue && tenureMonths.Value > 0
@@ -102,7 +131,8 @@ public class OrdersController : ControllerBase
             TotalAmount = totalAmount,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow,
-            Items = []
+            Items = [],
+            Packages = []
         };
 
         foreach (var ci in cartItems)
@@ -117,10 +147,34 @@ public class OrdersController : ControllerBase
                 UnitPrice = product.DiscountPrice ?? product.Price,
                 ProductSnapshot = JsonSerializer.Serialize(new { product.Name, product.SKU })
             });
+        }
 
-            await _db.Products.UpdateOneAsync(p => p.Id == ci.ProductId,
+        foreach (var pr in packageRequests)
+        {
+            var pkg = packageMap[pr.PackageId];
+            order.Packages.Add(new OrderPackage
+            {
+                PackageId = pkg.Id,
+                Name = pkg.Name,
+                RegularPrice = pkg.RegularPrice,
+                PackagePrice = pkg.PackagePrice,
+                Quantity = pr.Quantity,
+                Items = pkg.Items.Select(item => new OrderPackageItem
+                {
+                    ProductId = item.ProductId,
+                    ProductName = productMap.GetValueOrDefault(item.ProductId)?.Name ?? "Unknown Product",
+                    Quantity = item.Quantity,
+                    UnitPrice = productMap.TryGetValue(item.ProductId, out var p) ? (p.DiscountPrice ?? p.Price) : 0m
+                }).ToList()
+            });
+        }
+
+        // Decrement stock once per product using the aggregated totals.
+        foreach (var (productId, quantity) in requiredQuantities)
+        {
+            await _db.Products.UpdateOneAsync(p => p.Id == productId,
                 Builders<Product>.Update
-                    .Inc(p => p.Stock, -ci.Quantity)
+                    .Inc(p => p.Stock, -quantity)
                     .Set(p => p.UpdatedAt, DateTime.UtcNow));
         }
 
@@ -261,9 +315,17 @@ public class OrdersController : ControllerBase
     private async Task<List<OrderDto>> MapOrdersToDtos(IEnumerable<Order> orders)
     {
         var orderList = orders.ToList();
-        var productIds = orderList.SelectMany(o => o.Items).Select(i => i.ProductId).Distinct().ToList();
+        var productIds = orderList
+            .SelectMany(o => o.Items.Select(i => i.ProductId)
+                .Concat(o.Packages.SelectMany(pkg => pkg.Items.Select(pi => pi.ProductId))))
+            .Distinct()
+            .ToList();
         var products = await _db.Products.Find(p => productIds.Contains(p.Id)).ToListAsync();
         var productMap = products.ToDictionary(p => p.Id);
+
+        string? ImageFor(int productId) =>
+            productMap.GetValueOrDefault(productId)?.Images.FirstOrDefault(img => img.IsPrimary)?.ImageUrl
+                ?? productMap.GetValueOrDefault(productId)?.Images.FirstOrDefault()?.ImageUrl;
 
         return orderList.Select(o =>
         {
@@ -295,8 +357,7 @@ public class OrdersController : ControllerBase
                     i.Id,
                     i.ProductId,
                     productMap.GetValueOrDefault(i.ProductId)?.Name ?? "Unknown Product",
-                    productMap.GetValueOrDefault(i.ProductId)?.Images.FirstOrDefault(img => img.IsPrimary)?.ImageUrl
-                        ?? productMap.GetValueOrDefault(i.ProductId)?.Images.FirstOrDefault()?.ImageUrl,
+                    ImageFor(i.ProductId),
                     i.UnitPrice,
                     i.Quantity
                 )).ToList(),
@@ -304,7 +365,21 @@ public class OrdersController : ControllerBase
                 o.EmiTenureMonths,
                 o.EmiCompletedMonths,
                 o.EmiMonthlyAmount,
-                o.EmiBank
+                o.EmiBank,
+                o.Packages.Select(pkg => new OrderPackageDto(
+                    pkg.PackageId,
+                    pkg.Name,
+                    pkg.RegularPrice,
+                    pkg.PackagePrice,
+                    pkg.Quantity,
+                    pkg.Items.Select(pi => new OrderPackageItemDto(
+                        pi.ProductId,
+                        pi.ProductName,
+                        ImageFor(pi.ProductId),
+                        pi.Quantity,
+                        pi.UnitPrice
+                    )).ToList()
+                )).ToList()
             );
         }).ToList();
     }

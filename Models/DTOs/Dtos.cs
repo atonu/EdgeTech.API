@@ -73,7 +73,8 @@ public record PlaceOrderRequest(
     List<PlaceOrderItemRequest> Items,
     bool IsEmi = false,
     int? EmiTenureMonths = null,
-    string? EmiBank = null
+    string? EmiBank = null,
+    List<PlaceOrderPackageRequest>? Packages = null
 );
 public record OrderDto(
     int Id,
@@ -91,7 +92,8 @@ public record OrderDto(
     int? EmiTenureMonths = null,
     int EmiCompletedMonths = 0,
     decimal? EmiMonthlyAmount = null,
-    string? EmiBank = null
+    string? EmiBank = null,
+    List<OrderPackageDto>? Packages = null
 );
 public record OrderItemDto(int Id, int ProductId, string ProductName, string? ImageUrl, decimal UnitPrice, int Quantity);
 public record UpdateOrderStatusRequest(OrderStatus Status);
@@ -113,6 +115,19 @@ public record PackageBuildDto(int Id, string Name, decimal TotalPrice, DateTime 
 public record PackageComponentDto(string SlotKey, int ProductId, string ProductName, string? ImageUrl, decimal Price, int Quantity);
 public record SavePackageRequest(string Name, List<SaveComponentRequest> Components);
 public record SaveComponentRequest(string SlotKey, int ProductId, int Quantity);
+
+// Admin Package (bundle) DTOs
+public record PackageItemDto(string SlotKey, int ProductId, string ProductName, string? ImageUrl, decimal UnitPrice, int Quantity, int Stock);
+public record PackageDto(
+    int Id, string Name, string? Description, bool IsActive,
+    decimal RegularPrice, decimal PackagePrice,
+    List<PackageItemDto> Items, DateTime UpdatedAt);
+public record SavePackageItemRequest(string SlotKey, int ProductId, int Quantity);
+public record CreatePackageRequest(string Name, string? Description, bool IsActive, decimal RegularPrice, decimal PackagePrice, List<SavePackageItemRequest> Items);
+public record UpdatePackageRequest(string Name, string? Description, bool IsActive, decimal RegularPrice, decimal PackagePrice, List<SavePackageItemRequest> Items);
+public record PlaceOrderPackageRequest(int PackageId, int Quantity);
+public record OrderPackageItemDto(int ProductId, string ProductName, string? ImageUrl, int Quantity, decimal UnitPrice);
+public record OrderPackageDto(int PackageId, string Name, decimal RegularPrice, decimal PackagePrice, int Quantity, List<OrderPackageItemDto> Items);
 
 // Pagination
 public record PagedResult<T>(List<T> Items, int TotalCount, int Page, int PageSize, int TotalPages);

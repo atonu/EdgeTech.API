@@ -57,6 +57,7 @@ public static class MongoDbInitializer
 
         await db.Orders.Indexes.CreateOneAsync(new CreateIndexModel<Order>(Builders<Order>.IndexKeys.Ascending(o => o.UserId)));
         await db.PackageBuilds.Indexes.CreateOneAsync(new CreateIndexModel<PackageBuild>(Builders<PackageBuild>.IndexKeys.Ascending(p => p.UserId)));
+        await db.Packages.Indexes.CreateOneAsync(new CreateIndexModel<Package>(Builders<Package>.IndexKeys.Ascending(p => p.IsActive)));
         await db.PolicyPages.Indexes.CreateOneAsync(
             new CreateIndexModel<PolicyPage>(Builders<PolicyPage>.IndexKeys.Ascending(p => p.Slug), new CreateIndexOptions { Unique = true }));
     }
@@ -347,6 +348,7 @@ public static class MongoDbInitializer
             ["orderItems"] = (await db.Orders.Find(_ => true).ToListAsync()).SelectMany(o => o.Items).DefaultIfEmpty().Max(i => i?.Id ?? 0),
             ["packageBuilds"] = (await db.PackageBuilds.Find(_ => true).SortByDescending(x => x.Id).FirstOrDefaultAsync())?.Id ?? 0,
             ["packageComponents"] = (await db.PackageBuilds.Find(_ => true).ToListAsync()).SelectMany(o => o.Components).DefaultIfEmpty().Max(i => i?.Id ?? 0),
+            ["packages"] = (await db.Packages.Find(_ => true).SortByDescending(x => x.Id).FirstOrDefaultAsync())?.Id ?? 0,
             ["recentlyViewed"] = (await db.RecentlyViewed.Find(_ => true).SortByDescending(x => x.Id).FirstOrDefaultAsync())?.Id ?? 0,
             ["services"] = (await db.Services.Find(_ => true).SortByDescending(x => x.Id).FirstOrDefaultAsync())?.Id ?? 0,
             ["productGroups"] = (await db.ProductGroups.Find(_ => true).SortByDescending(x => x.Id).FirstOrDefaultAsync())?.Id ?? 0,

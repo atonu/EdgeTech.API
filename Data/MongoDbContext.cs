@@ -38,6 +38,7 @@ public class MongoDbContext
     public IMongoCollection<CartItem> CartItems => Database.GetCollection<CartItem>("cartItems");
     public IMongoCollection<Order> Orders => Database.GetCollection<Order>("orders");
     public IMongoCollection<PackageBuild> PackageBuilds => Database.GetCollection<PackageBuild>("packageBuilds");
+    public IMongoCollection<Package> Packages => Database.GetCollection<Package>("packages");
     public IMongoCollection<RecentlyViewed> RecentlyViewed => Database.GetCollection<RecentlyViewed>("recentlyViewed");
     public IMongoCollection<Counter> Counters => Database.GetCollection<Counter>("counters");
     public IMongoCollection<PolicyPage> PolicyPages => Database.GetCollection<PolicyPage>("policyPages");

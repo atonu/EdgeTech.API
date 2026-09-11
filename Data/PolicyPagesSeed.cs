@@ -265,6 +265,106 @@ public static class PolicyPagesSeed
                         }
                     }
                 }
+            },
+
+            // 6. Home Continuous Infinite-Scroll Banner
+            new PolicyPage
+            {
+                Slug = "home-banner",
+                Title = "Homepage Continuous Infinite Banner",
+                Subtitle = "Infinite marquee banner text scrolling directly below hero section on homepage",
+                Badge = "Marquee Announcement",
+                LastUpdated = "September 2026",
+                UpdatedAt = DateTime.UtcNow,
+                Sections = new List<PolicySection>
+                {
+                    new PolicySection
+                    {
+                        Order = 1,
+                        Title = "100% Genuine Products",
+                        Body = "Direct from authorized brand distributors",
+                        HighlightTitle = "GENUINE",
+                        HighlightText = "🛡️"
+                    },
+                    new PolicySection
+                    {
+                        Order = 2,
+                        Title = "Express Fast Delivery",
+                        Body = "Inside Dhaka 5 Days • Nationwide 10 Days",
+                        HighlightTitle = "EXPRESS",
+                        HighlightText = "🚚"
+                    },
+                    new PolicySection
+                    {
+                        Order = 3,
+                        Title = "7-10 Days Return & Exchange",
+                        Body = "Hassle-free replacement guarantee",
+                        HighlightTitle = "EXCHANGE",
+                        HighlightText = "🔄"
+                    },
+                    new PolicySection
+                    {
+                        Order = 4,
+                        Title = "0% EMI Facility Available",
+                        Body = "Up to 36 months on major credit cards",
+                        HighlightTitle = "0% EMI",
+                        HighlightText = "💳"
+                    },
+                    new PolicySection
+                    {
+                        Order = 5,
+                        Title = "24/7 Expert Technical Support",
+                        Body = "Certified security engineers on standby",
+                        HighlightTitle = "SUPPORT",
+                        HighlightText = "🎧"
+                    },
+                    new PolicySection
+                    {
+                        Order = 6,
+                        Title = "Professional On-Site Installation",
+                        Body = "Nationwide setup and warranty coverage",
+                        HighlightTitle = "SETUP",
+                        HighlightText = "⚡"
+                    }
+                }
+            },
+
+            // 7. Product Detail Guarantee Banner
+            new PolicyPage
+            {
+                Slug = "product-banner",
+                Title = "Product Page Guarantee & Notice Banner",
+                Subtitle = "Banner items and guarantee options displayed directly beneath Add to Cart and chips on product pages",
+                Badge = "Product Value Assurance",
+                LastUpdated = "September 2026",
+                UpdatedAt = DateTime.UtcNow,
+                Sections = new List<PolicySection>
+                {
+                    new PolicySection
+                    {
+                        Order = 1,
+                        Title = "Fast Delivery",
+                        Body = "Inside Dhaka 5 Days • Outside Dhaka 10 Days nationwide express shipping.",
+                        HighlightTitle = "DELIVERY",
+                        HighlightText = "🚚"
+                    },
+                    new PolicySection
+                    {
+                        Order = 2,
+                        Title = "Official Warranty",
+                        Body = "100% Genuine product with authorized brand warranty support.",
+                        HighlightTitle = "WARRANTY",
+                        HighlightText = "🛡️"
+                    },
+                    new PolicySection
+                    {
+                        Order = 3,
+                        Title = "Easy Exchange",
+                        Body = "7 to 10 working days hassle-free return and exchange guarantee.",
+                        HighlightTitle = "EXCHANGE",
+                        HighlightText = "🔄"
+                    }
+                }
             }
         };
     }

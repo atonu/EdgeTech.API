@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using EdgeTech.API.Data;
 using EdgeTech.API.Models;
 using EdgeTech.API.Models.DTOs;
@@ -322,6 +323,82 @@ public class ProductsController : ControllerBase
         return NoContent();
     }
 
+    [HttpGet("{id}/reviews")]
+    public async Task<IActionResult> GetReviews(int id)
+    {
+        var product = await _db.Products.Find(p => p.Id == id).FirstOrDefaultAsync();
+        if (product == null) return NotFound();
+
+        var userIds = product.Reviews.Select(r => r.UserId).Distinct().ToList();
+        var users = await _db.Users.Find(u => userIds.Contains(u.Id)).ToListAsync();
+        var userMap = users.ToDictionary(u => u.Id, u => $"{u.FirstName} {u.LastName}".Trim());
+
+        var dtos = product.Reviews
+            .OrderByDescending(r => r.CreatedAt)
+            .Select(r => new ReviewDto(
+                r.Id,
+                r.UserId,
+                userMap.TryGetValue(r.UserId, out var name) && !string.IsNullOrWhiteSpace(name) ? name : "Customer",
+                r.Rating,
+                r.Comment,
+                r.CreatedAt
+            ))
+            .ToList();
+
+        return Ok(dtos);
+    }
+
+    [HttpPost("{id}/reviews")]
+    [Authorize]
+    public async Task<IActionResult> AddReview(int id, [FromBody] CreateReviewRequest req)
+    {
+        if (req.Rating < 1 || req.Rating > 5)
+            return BadRequest(new { message = "Rating must be between 1 and 5 stars." });
+
+        var product = await _db.Products.Find(p => p.Id == id).FirstOrDefaultAsync();
+        if (product == null) return NotFound();
+
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(userId)) return Unauthorized();
+
+        var user = await _db.Users.Find(u => u.Id == userId).FirstOrDefaultAsync();
+        var userName = user != null ? $"{user.FirstName} {user.LastName}".Trim() : "Customer";
+        if (string.IsNullOrWhiteSpace(userName)) userName = "Customer";
+
+        var existingReview = product.Reviews.FirstOrDefault(r => r.UserId == userId);
+        Review review;
+        if (existingReview != null)
+        {
+            existingReview.Rating = req.Rating;
+            existingReview.Comment = req.Comment;
+            existingReview.CreatedAt = DateTime.UtcNow;
+            review = existingReview;
+        }
+        else
+        {
+            var nextId = await _ids.NextAsync("reviews");
+            review = new Review
+            {
+                Id = nextId,
+                ProductId = id,
+                UserId = userId,
+                Rating = req.Rating,
+                Comment = req.Comment,
+                CreatedAt = DateTime.UtcNow
+            };
+            product.Reviews.Add(review);
+        }
+
+        product.UpdatedAt = DateTime.UtcNow;
+        await _db.Products.ReplaceOneAsync(p => p.Id == id, product);
+
+        var avgRating = product.Reviews.Any() ? Math.Round(product.Reviews.Average(r => r.Rating), 1) : 0;
+        var reviewCount = product.Reviews.Count;
+
+        var dto = new ReviewDto(review.Id, review.UserId, userName, review.Rating, review.Comment, review.CreatedAt);
+        return Ok(new { review = dto, averageRating = avgRating, reviewCount });
+    }
+
     private static ProductListDto MapToListDto(Product p, Dictionary<int, Category> categoryMap, Dictionary<int, Brand> brandMap) => new(
         p.Id,
         p.Name,
@@ -332,7 +409,9 @@ public class ProductsController : ControllerBase
         p.Stock,
         p.IsFeatured,
         categoryMap.GetValueOrDefault(p.CategoryId)?.Name ?? "Unknown",
-        brandMap.GetValueOrDefault(p.BrandId)?.Name ?? "Unknown"
+        brandMap.GetValueOrDefault(p.BrandId)?.Name ?? "Unknown",
+        p.Reviews.Any() ? Math.Round(p.Reviews.Average(r => r.Rating), 1) : 0,
+        p.Reviews.Count
     );
 
     private static ProductDto MapToDto(Product p, Category? category, Brand? brand) => new(
@@ -344,7 +423,7 @@ public class ProductsController : ControllerBase
         p.Images.FirstOrDefault(i => i.IsPrimary)?.ImageUrl ?? p.Images.FirstOrDefault()?.ImageUrl,
         p.Images.Select(i => new ProductImageDto(i.Id, i.ImageUrl, i.IsPrimary, i.DisplayOrder)).ToList(),
         p.Specifications.OrderBy(s => s.DisplayOrder).Select(s => new ProductSpecDto(s.Id, s.Key, s.Value, s.DisplayOrder)).ToList(),
-        p.Reviews.Any() ? p.Reviews.Average(r => r.Rating) : 0,
+        p.Reviews.Any() ? Math.Round(p.Reviews.Average(r => r.Rating), 1) : 0,
         p.Reviews.Count,
         p.CreatedAt
     );

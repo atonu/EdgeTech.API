@@ -128,7 +128,9 @@ public class ProductGroupsController : ControllerBase
                     p.Stock,
                     p.IsFeatured,
                     categoryMap.GetValueOrDefault(p.CategoryId)?.Name ?? "Unknown",
-                    brandMap.GetValueOrDefault(p.BrandId)?.Name ?? "Unknown"
+                    brandMap.GetValueOrDefault(p.BrandId)?.Name ?? "Unknown",
+                    p.Reviews.Any() ? Math.Round(p.Reviews.Average(r => r.Rating), 1) : 0,
+                    p.Reviews.Count
                 );
             })
             .ToList() ?? [];

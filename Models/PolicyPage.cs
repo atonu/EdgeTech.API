@@ -24,6 +24,7 @@ public class PolicySection
 {
     public string Id { get; set; } = Guid.NewGuid().ToString("N");
     public string Title { get; set; } = string.Empty;
+    public string? Subtitle { get; set; }
     public string Body { get; set; } = string.Empty;
     public string? HighlightTitle { get; set; }
     public string? HighlightText { get; set; }

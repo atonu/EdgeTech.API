@@ -194,6 +194,7 @@ public class PolicyPagesController : ControllerBase
                 switch (field)
                 {
                     case "title": section.Title = request.Value; break;
+                    case "subtitle": section.Subtitle = request.Value; break;
                     case "body": section.Body = request.Value; break;
                     case "highlighttitle": section.HighlightTitle = request.Value; break;
                     case "highlighttext": section.HighlightText = request.Value; break;

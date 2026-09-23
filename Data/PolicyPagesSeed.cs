@@ -365,6 +365,46 @@ public static class PolicyPagesSeed
                         HighlightText = "🔄"
                     }
                 }
+            },
+
+            // 8. Website Footer Configuration
+            new PolicyPage
+            {
+                Slug = "footer",
+                Title = "Website Footer Configuration",
+                Subtitle = "Manage global footer company information, address, business hours, and compliance disclosures",
+                Badge = "Footer Settings",
+                LastUpdated = "September 2026",
+                UpdatedAt = DateTime.UtcNow,
+                Sections = new List<PolicySection>
+                {
+                    new PolicySection
+                    {
+                        Id = "brand",
+                        Order = 1,
+                        Title = "Brand & Tagline",
+                        Body = "Bangladesh's trusted partner for CCTV surveillance, networking, and security solutions since 2015."
+                    },
+                    new PolicySection
+                    {
+                        Id = "office",
+                        Order = 2,
+                        Title = "Registered Office",
+                        HighlightTitle = "373, South Monipur, Mirpur-2, Dhaka 1216",
+                        HighlightText = "+880 1329-661250",
+                        Body = "info@edgetech.com.bd",
+                        Subtitle = "Sat – Thu: 9:00 AM – 8:00 PM (Friday Closed)"
+                    },
+                    new PolicySection
+                    {
+                        Id = "compliance",
+                        Order = 3,
+                        Title = "Compliance Disclosures",
+                        HighlightTitle = "TRAD/DNCC/042819/2023",
+                        HighlightText = "Inside Dhaka: 5 Days | Outside Dhaka: 10 Days",
+                        Body = "7 to 10 Working Days"
+                    }
+                }
             }
         };
     }

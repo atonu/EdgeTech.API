@@ -75,7 +75,11 @@ public record PlaceOrderRequest(
     bool IsEmi = false,
     int? EmiTenureMonths = null,
     string? EmiBank = null,
-    List<PlaceOrderPackageRequest>? Packages = null
+    List<PlaceOrderPackageRequest>? Packages = null,
+    string? Fbp = null,
+    string? Fbc = null,
+    string? GaClientId = null,
+    string? Gclid = null
 );
 public record OrderDto(
     int Id,

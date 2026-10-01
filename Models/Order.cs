@@ -20,6 +20,14 @@ public class Order
     public string? AdminNotes { get; set; }
     public string? PaymentMethod { get; set; }
     public string? TransactionId { get; set; }
+    public string? Fbp { get; set; }
+    public string? Fbc { get; set; }
+    public string? GaClientId { get; set; }
+    public string? Gclid { get; set; }
+    public string? ClientIp { get; set; }
+    public string? UserAgent { get; set; }
+    public bool CapiSent { get; set; }
+    public DateTime? CapiSentAt { get; set; }
     public bool IsEmi { get; set; }
     public int? EmiTenureMonths { get; set; }
     public int EmiCompletedMonths { get; set; }

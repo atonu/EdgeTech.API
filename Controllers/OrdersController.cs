@@ -123,6 +123,13 @@ public class OrdersController : ControllerBase
             Notes = req.Notes,
             AdminNotes = null,
             PaymentMethod = req.PaymentMethod,
+            Fbp = req.Fbp,
+            Fbc = req.Fbc,
+            GaClientId = req.GaClientId,
+            Gclid = req.Gclid,
+            ClientIp = Request.Headers["X-Forwarded-For"].FirstOrDefault()?.Split(',')[0].Trim()
+                ?? HttpContext.Connection.RemoteIpAddress?.ToString(),
+            UserAgent = Request.Headers.UserAgent.ToString(),
             IsEmi = isEmi,
             EmiTenureMonths = tenureMonths,
             EmiCompletedMonths = 0,

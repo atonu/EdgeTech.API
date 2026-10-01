@@ -1,0 +1,51 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>EdgeTech.API</name>
+    </assembly>
+    <members>
+        <member name="M:EdgeTech.API.Controllers.FeedbacksController.Create(EdgeTech.API.Models.DTOs.CreateFeedbackRequest)">
+            <summary>
+            Submit feedback or support message (Public / Anonymous)
+            </summary>
+        </member>
+        <member name="M:EdgeTech.API.Controllers.FeedbacksController.GetAll(System.String,System.String,System.String,System.Int32,System.Int32)">
+            <summary>
+            List all feedbacks with pagination and filters (Admin only)
+            </summary>
+        </member>
+        <member name="M:EdgeTech.API.Controllers.FeedbacksController.GetById(System.Int32)">
+            <summary>
+            Get feedback details by ID (Admin only)
+            </summary>
+        </member>
+        <member name="M:EdgeTech.API.Controllers.FeedbacksController.UpdateStatus(System.Int32,EdgeTech.API.Models.DTOs.UpdateFeedbackStatusRequest)">
+            <summary>
+            Update feedback status and administrative notes (Admin only)
+            </summary>
+        </member>
+        <member name="M:EdgeTech.API.Controllers.FeedbacksController.Delete(System.Int32)">
+            <summary>
+            Delete feedback by ID (Admin only)
+            </summary>
+        </member>
+        <member name="M:EdgeTech.API.Controllers.HeroCarouselController.DefaultSlides">
+            <summary>
+            The slides shown before an admin has ever saved the carousel. Mirrors the
+            images that shipped with the site so the homepage looks unchanged on first run.
+            </summary>
+        </member>
+        <member name="T:EdgeTech.API.Models.HeroCarousel">
+            <summary>
+            Singleton settings document driving the homepage hero carousel.
+            Exactly one document lives in the collection; slide count is admin-controlled.
+            </summary>
+        </member>
+        <member name="F:EdgeTech.API.Models.HeroCarousel.MinSlides">
+            <summary>Minimum slides the carousel is allowed to run with.</summary>
+        </member>
+        <member name="P:EdgeTech.API.Models.HeroCarousel.AutoplayMs">
+            <summary>Milliseconds each slide stays on screen before auto-advancing.</summary>
+        </member>
+    </members>
+</doc>

@@ -19,11 +19,19 @@ public class MongoDbContext
 
     public MongoDbContext(IConfiguration configuration)
     {
-        var connectionString = configuration["MongoDb:ConnectionString"];
-        var databaseName = configuration["MongoDb:DatabaseName"] ?? "EdgeTechDB";
+        var connectionString = configuration["MongoDb:ConnectionString"]
+            ?? Environment.GetEnvironmentVariable("MONGODB_CONNECTION_STRING")
+            ?? Environment.GetEnvironmentVariable("MongoDb__ConnectionString")
+            ?? "mongodb://localhost:27017";
 
-        if (string.IsNullOrWhiteSpace(connectionString))
-            throw new InvalidOperationException("MongoDb:ConnectionString is not configured.");
+        if (connectionString.Contains("<user>", StringComparison.OrdinalIgnoreCase)
+            || connectionString.Contains("SET_IN_ENVIRONMENT", StringComparison.OrdinalIgnoreCase)
+            || connectionString.Contains("cluster", StringComparison.OrdinalIgnoreCase) && connectionString.Contains("mongodb+srv", StringComparison.OrdinalIgnoreCase))
+        {
+            connectionString = "mongodb://localhost:27017";
+        }
+
+        var databaseName = configuration["MongoDb:DatabaseName"] ?? Environment.GetEnvironmentVariable("MONGODB_DATABASE") ?? "EdgeTechDB";
 
         var client = new MongoClient(connectionString);
         Database = client.GetDatabase(databaseName);

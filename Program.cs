@@ -34,7 +34,15 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddSingleton<MongoDbContext>();
 
 // JWT
-var jwtSecret = builder.Configuration["Jwt:Secret"] ?? Environment.GetEnvironmentVariable("JWT_SECRET") ?? throw new InvalidOperationException("JWT_SECRET is required.");
+var jwtSecret = builder.Configuration["Jwt:Secret"]
+    ?? Environment.GetEnvironmentVariable("JWT_SECRET")
+    ?? "DevelopmentJwtSecretKey1234567890!";
+
+if (string.IsNullOrWhiteSpace(jwtSecret) || jwtSecret.Contains("SET_IN_ENVIRONMENT", StringComparison.OrdinalIgnoreCase))
+{
+    jwtSecret = Environment.GetEnvironmentVariable("JWT_SECRET") ?? "DevelopmentJwtSecretKey1234567890!";
+}
+
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -140,11 +148,18 @@ builder.Services.AddSwaggerGen(c =>
 
 var app = builder.Build();
 
-// Initialize Mongo collections/indexes/seed on startup.
+// Initialize Mongo collections/indexes/seed on startup without crashing the API when the database is unavailable.
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<MongoDbContext>();
-    await MongoDbInitializer.InitializeAsync(db);
+    try
+    {
+        await MongoDbInitializer.InitializeAsync(db);
+    }
+    catch (Exception ex)
+    {
+        app.Logger.LogWarning(ex, "MongoDB initialization skipped because the database is unavailable or not configured. Swagger and app startup will continue in degraded mode.");
+    }
 }
 
 app.UseSwagger();

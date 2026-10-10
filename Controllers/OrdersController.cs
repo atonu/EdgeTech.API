@@ -16,11 +16,13 @@ public class OrdersController : ControllerBase
 {
     private readonly MongoDbContext _db;
     private readonly IIdGeneratorService _ids;
+    private readonly IMetaConversionQueue _metaQueue;
 
-    public OrdersController(MongoDbContext db, IIdGeneratorService ids)
+    public OrdersController(MongoDbContext db, IIdGeneratorService ids, IMetaConversionQueue metaQueue)
     {
         _db = db;
         _ids = ids;
+        _metaQueue = metaQueue;
     }
 
     private string? UserId => User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -186,6 +188,20 @@ public class OrdersController : ControllerBase
         }
 
         await _db.Orders.InsertOneAsync(order);
+
+        if (string.Equals(req.PaymentMethod, "cod", StringComparison.OrdinalIgnoreCase))
+        {
+            order.CapiSent = true;
+            order.CapiSentAt = DateTime.UtcNow;
+            await _db.Orders.ReplaceOneAsync(o => o.Id == order.Id, order);
+            _metaQueue.Enqueue(async ct =>
+            {
+                using var scope = HttpContext.RequestServices.CreateScope();
+                var meta = scope.ServiceProvider.GetRequiredService<IMetaConversionsService>();
+                await meta.SendPurchaseAsync(order, ct);
+            });
+        }
+
         if (userId != null)
             await _db.CartItems.DeleteManyAsync(ci => ci.UserId == userId);
 

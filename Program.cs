@@ -60,6 +60,9 @@ builder.Services.AddAuthorization();
 builder.Services.AddScoped<IJwtService, JwtService>();
 builder.Services.AddScoped<IBlobStorageService, BlobStorageService>();
 builder.Services.AddScoped<IIdGeneratorService, IdGeneratorService>();
+builder.Services.Configure<MetaOptions>(builder.Configuration.GetSection("Meta"));
+builder.Services.AddHttpClient<IMetaConversionsService, MetaConversionsService>();
+builder.Services.AddSingleton<IMetaConversionQueue, MetaConversionQueue>();
 
 // CORS
 var configuredOrigins = (builder.Configuration["Frontend:Url"] ?? "http://localhost:3000,http://localhost:3001,https://edgetech.com.bd,https://www.edgetech.com.bd")

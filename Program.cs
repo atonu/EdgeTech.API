@@ -34,7 +34,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddSingleton<MongoDbContext>();
 
 // JWT
-var jwtSecret = builder.Configuration["Jwt:Secret"] ?? "EdgeTechSuperSecretKeyMustBe32CharactersLong!";
+var jwtSecret = builder.Configuration["Jwt:Secret"] ?? Environment.GetEnvironmentVariable("JWT_SECRET") ?? throw new InvalidOperationException("JWT_SECRET is required.");
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;

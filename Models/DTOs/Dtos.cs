@@ -81,6 +81,15 @@ public record PlaceOrderRequest(
     string? GaClientId = null,
     string? Gclid = null
 );
+public record VerifyPaymentRequest(
+    string PaymentMethod,
+    string? TransactionId,
+    string? GatewayReference,
+    decimal? PaidAmount,
+    bool IsSuccessful = true,
+    string? Status = null,
+    string? Message = null
+);
 public record OrderDto(
     int Id,
     string? OrderNumber,

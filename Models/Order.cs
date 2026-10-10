@@ -20,6 +20,10 @@ public class Order
     public string? AdminNotes { get; set; }
     public string? PaymentMethod { get; set; }
     public string? TransactionId { get; set; }
+    public PaymentStatus PaymentStatus { get; set; } = PaymentStatus.Pending;
+    public string? GatewayReference { get; set; }
+    public DateTime? PaidAt { get; set; }
+    public DateTime? PaymentVerifiedAt { get; set; }
     public string? Fbp { get; set; }
     public string? Fbc { get; set; }
     public string? GaClientId { get; set; }
@@ -71,4 +75,13 @@ public enum OrderStatus
     InProgress,
     Done,
     Cancelled
+}
+
+public enum PaymentStatus
+{
+    Pending,
+    Paid,
+    Failed,
+    Cancelled,
+    Refunded
 }

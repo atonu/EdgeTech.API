@@ -117,6 +117,7 @@ public class OrdersController : ControllerBase
             OrderNumber = orderNumber,
             UserId = userId,
             Status = OrderStatus.Placed,
+            PaymentStatus = PaymentStatus.Pending,
             CustomerName = req.Customer.FullName,
             CustomerEmail = req.Customer.Email,
             CustomerPhone = req.Customer.Phone,
@@ -191,9 +192,9 @@ public class OrdersController : ControllerBase
 
         if (string.Equals(req.PaymentMethod, "cod", StringComparison.OrdinalIgnoreCase))
         {
-            order.CapiSent = true;
-            order.CapiSentAt = DateTime.UtcNow;
-            await _db.Orders.ReplaceOneAsync(o => o.Id == order.Id, order);
+            order.PaymentStatus = PaymentStatus.Paid;
+            order.PaidAt ??= DateTime.UtcNow;
+            order.PaymentVerifiedAt ??= DateTime.UtcNow;
             _metaQueue.Enqueue(async ct =>
             {
                 using var scope = HttpContext.RequestServices.CreateScope();
@@ -206,6 +207,48 @@ public class OrdersController : ControllerBase
             await _db.CartItems.DeleteManyAsync(ci => ci.UserId == userId);
 
         return Ok(new { orderId = order.Id, orderNumber = order.OrderNumber });
+    }
+
+    [HttpPost("{id}/payment/verify")]
+    [AllowAnonymous]
+    public async Task<IActionResult> VerifyPayment(int id, [FromBody] VerifyPaymentRequest req)
+    {
+        var order = await _db.Orders.Find(o => o.Id == id).FirstOrDefaultAsync();
+        if (order == null)
+            return NotFound(new { message = "Order not found" });
+
+        if (order.CapiSent || order.PaymentStatus == PaymentStatus.Paid)
+            return Ok(new { status = "already_verified", orderId = order.Id, orderNumber = order.OrderNumber });
+
+        var isSuccessful = req.IsSuccessful && (req.PaidAmount is null || req.PaidAmount.Value >= Math.Min(order.TotalAmount, order.TotalAmount));
+
+        if (!isSuccessful)
+        {
+            order.PaymentStatus = PaymentStatus.Failed;
+            order.UpdatedAt = DateTime.UtcNow;
+            await _db.Orders.ReplaceOneAsync(o => o.Id == id, order);
+            return Ok(new { status = "failed", orderId = order.Id, orderNumber = order.OrderNumber, message = req.Message ?? "Payment was rejected." });
+        }
+
+        order.PaymentMethod ??= req.PaymentMethod;
+        order.TransactionId ??= req.TransactionId;
+        order.GatewayReference ??= req.GatewayReference;
+        order.PaymentStatus = PaymentStatus.Paid;
+        order.PaidAt ??= DateTime.UtcNow;
+        order.PaymentVerifiedAt = DateTime.UtcNow;
+        order.Status = OrderStatus.Verified;
+        order.UpdatedAt = DateTime.UtcNow;
+
+        await _db.Orders.ReplaceOneAsync(o => o.Id == id, order);
+
+        _metaQueue.Enqueue(async ct =>
+        {
+            using var scope = HttpContext.RequestServices.CreateScope();
+            var meta = scope.ServiceProvider.GetRequiredService<IMetaConversionsService>();
+            await meta.SendPurchaseAsync(order, ct);
+        });
+
+        return Ok(new { status = "verified", orderId = order.Id, orderNumber = order.OrderNumber });
     }
 
     [HttpGet]

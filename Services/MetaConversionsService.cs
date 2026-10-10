@@ -1,8 +1,10 @@
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
+using EdgeTech.API.Data;
 using EdgeTech.API.Models;
 using Microsoft.Extensions.Options;
+using MongoDB.Driver;
 
 namespace EdgeTech.API.Services;
 
@@ -14,12 +16,14 @@ public interface IMetaConversionsService
 public class MetaConversionsService : IMetaConversionsService
 {
     private readonly HttpClient _http;
+    private readonly MongoDbContext _db;
     private readonly MetaOptions _meta;
     private readonly ILogger<MetaConversionsService> _logger;
 
-    public MetaConversionsService(HttpClient http, IOptions<MetaOptions> meta, ILogger<MetaConversionsService> logger)
+    public MetaConversionsService(HttpClient http, MongoDbContext db, IOptions<MetaOptions> meta, ILogger<MetaConversionsService> logger)
     {
         _http = http;
+        _db = db;
         _meta = meta.Value;
         _logger = logger;
     }
@@ -95,6 +99,13 @@ public class MetaConversionsService : IMetaConversionsService
             _logger.LogError("Meta CAPI rejected order {OrderId}: {StatusCode} {Body}", order.Id, response.StatusCode, body);
             return;
         }
+
+        var update = Builders<Order>.Update
+            .Set(o => o.CapiSent, true)
+            .Set(o => o.CapiSentAt, DateTime.UtcNow)
+            .Set(o => o.UpdatedAt, DateTime.UtcNow);
+
+        await _db.Orders.UpdateOneAsync(o => o.Id == order.Id, update, cancellationToken: ct);
 
         _logger.LogInformation("Meta CAPI accepted order {OrderId}.", order.Id);
     }

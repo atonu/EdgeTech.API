@@ -15,15 +15,23 @@ jobs:
 
       - name: Deploy via SSH to OCI Instance
         uses: appleboy/ssh-action@v1.0.3
+        env:
+          MONGODB_CONNECTION_STRING: ${{ secrets.MONGODB_CONNECTION_STRING }}
+          MONGODB_DATABASE: ${{ secrets.MONGODB_DATABASE }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          AZURE_BLOB_STORAGE_CONNECTION_STRING: ${{ secrets.AZURE_BLOB_STORAGE_CONNECTION_STRING }}
         with:
           host: ${{ secrets.OCI_HOST }}
           username: ${{ secrets.OCI_USERNAME }}
           key: ${{ secrets.OCI_SSH_KEY }}
           port: ${{ secrets.OCI_PORT || 22 }}
+          envs: MONGODB_CONNECTION_STRING,MONGODB_DATABASE,JWT_SECRET,AZURE_BLOB_STORAGE_CONNECTION_STRING
           script: |
             cd ~/apps/EdgeTech.API
             git reset --hard HEAD
             git pull origin main
+            : "${MONGODB_CONNECTION_STRING:?Set the GitHub secret MONGODB_CONNECTION_STRING before deploying}"
+            : "${JWT_SECRET:?Set the GitHub secret JWT_SECRET before deploying}"
             docker network create edgetech-net || true
             docker build --no-cache -t edgetech-api:latest .
             docker stop edgetech-api-container || true
@@ -33,5 +41,9 @@ jobs:
               --network edgetech-net \
               --restart unless-stopped \
               -p 5001:5001 \
+              -e MongoDb__ConnectionString="$MONGODB_CONNECTION_STRING" \
+              -e MongoDb__DatabaseName="${MONGODB_DATABASE:-EdgeTechDB}" \
+              -e Jwt__Secret="$JWT_SECRET" \
+              -e AzureBlobStorage__ConnectionString="${AZURE_BLOB_STORAGE_CONNECTION_STRING:-}" \
               -e Frontend__Url=https://edgetech.com.bd,https://www.edgetech.com.bd,http://localhost:3000 \
               edgetech-api:latest

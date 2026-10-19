@@ -107,10 +107,24 @@ public class ProductGroupsController : ControllerBase
         var products = await _db.Products.Find(p => p.IsActive).ToListAsync();
         var categories = await _db.Categories.Find(c => c.IsActive).ToListAsync();
         var brands = await _db.Brands.Find(b => b.IsActive).ToListAsync();
+        var weekStart = DateTime.UtcNow.AddDays(-7);
+        var recentOrders = await _db.Orders.Find(o =>
+            o.CreatedAt >= weekStart
+            && o.Status != OrderStatus.Cancelled
+            && o.PaymentStatus != PaymentStatus.Failed
+            && o.PaymentStatus != PaymentStatus.Cancelled
+            && o.PaymentStatus != PaymentStatus.Refunded).ToListAsync();
 
         var categoryMap = categories.ToDictionary(c => c.Id);
         var brandMap = brands.ToDictionary(b => b.Id);
         var productMap = products.ToDictionary(p => p.Id);
+        var latestPurchaseByProduct = recentOrders
+            .SelectMany(order =>
+                order.Items.Select(item => new { item.ProductId, PurchaseDate = order.CreatedAt })
+                    .Concat(order.Packages.SelectMany(package =>
+                        package.Items.Select(item => new { item.ProductId, PurchaseDate = order.CreatedAt }))))
+            .GroupBy(purchase => purchase.ProductId)
+            .ToDictionary(group => group.Key, group => group.Max(purchase => purchase.PurchaseDate));
 
         List<ProductListDto> Build(string key) => groups
             .FirstOrDefault(g => g.Key == key)?.ProductIds
@@ -135,11 +149,43 @@ public class ProductGroupsController : ControllerBase
             })
             .ToList() ?? [];
 
+        ProductListDto ToProductDto(Product p) => new(
+            p.Id,
+            p.Name,
+            p.Slug,
+            p.Price,
+            p.DiscountPrice,
+            p.Images.FirstOrDefault(i => i.IsPrimary)?.ImageUrl ?? p.Images.FirstOrDefault()?.ImageUrl,
+            p.Stock,
+            p.IsFeatured,
+            categoryMap.GetValueOrDefault(p.CategoryId)?.Name ?? "Unknown",
+            brandMap.GetValueOrDefault(p.BrandId)?.Name ?? "Unknown",
+            p.Reviews.Any() ? Math.Round(p.Reviews.Average(r => r.Rating), 1) : 0,
+            p.Reviews.Count
+        );
+
+        var featuredProducts = products.Where(p => p.IsFeatured);
+        var otherProducts = products.Where(p => !p.IsFeatured);
+        var newArrivals = featuredProducts.OrderByDescending(p => p.CreatedAt)
+            .Concat(otherProducts.OrderByDescending(p => p.CreatedAt))
+            .Take(5)
+            .Select(ToProductDto)
+            .ToList();
+        var mostPopular = featuredProducts
+            .OrderByDescending(p => latestPurchaseByProduct.GetValueOrDefault(p.Id))
+            .ThenByDescending(p => p.CreatedAt)
+            .Concat(otherProducts
+                .OrderByDescending(p => latestPurchaseByProduct.GetValueOrDefault(p.Id))
+                .ThenByDescending(p => p.CreatedAt))
+            .Take(5)
+            .Select(ToProductDto)
+            .ToList();
+
         return Ok(new
         {
             bestSellers = Build("best-sellers"),
-            mostPopular = Build("most-popular"),
-            newArrivals = Build("new-arrivals")
+            mostPopular,
+            newArrivals
         });
     }
 }

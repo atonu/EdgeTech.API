@@ -6,6 +6,7 @@ using EdgeTech.API.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
+using System.Text.RegularExpressions;
 
 namespace EdgeTech.API.Controllers;
 
@@ -32,7 +33,7 @@ public class PackageBuilderController : ControllerBase
         new("camera_4", "Camera 4", "Fourth CCTV Camera", "analog-cameras", "camera"),
         new("dvr", "DVR / NVR", "Digital Video Recorder or Network Video Recorder", "dvr-nvr", "server"),
         new("monitor", "Monitor", "Display Monitor", "monitor", "monitor"),
-        new("storage", "Hard Drive", "Surveillance HDD for recording storage", "hdd", "hard-drive"),
+        new("storage", "Storage", "Surveillance HDD for recording storage", "storage", "hard-drive"),
         new("cable", "Cable", "BNC/Network Cabling", "cable", "cable"),
         new("power", "Power Adapter", "Power Supply Unit", "power-adapter", "zap"),
         new("ups", "UPS", "Uninterruptible Power Supply", "ups", "battery"),
@@ -45,37 +46,64 @@ public class PackageBuilderController : ControllerBase
         var brands = await _db.Brands.Find(b => b.IsActive).ToListAsync();
         var products = await _db.Products.Find(p => p.IsActive).ToListAsync();
 
-        var categoryBySlug = categories.ToDictionary(c => c.Slug, c => c.Id);
         var categoryMap = categories.ToDictionary(c => c.Id);
         var brandMap = brands.ToDictionary(b => b.Id);
 
         var result = new List<object>();
         foreach (var slot in Slots)
         {
-            var slotProducts = new List<ProductListDto>();
-            if (categoryBySlug.TryGetValue(slot.CategorySlug, out var categoryId))
-            {
-                slotProducts = products
-                    .Where(p => p.CategoryId == categoryId)
-                    .Select(p => new ProductListDto(
-                        p.Id,
-                        p.Name,
-                        p.Slug,
-                        p.Price,
-                        p.DiscountPrice,
-                        p.Images.FirstOrDefault(i => i.IsPrimary)?.ImageUrl ?? p.Images.FirstOrDefault()?.ImageUrl,
-                        p.Stock,
-                        p.IsFeatured,
-                        categoryMap.GetValueOrDefault(p.CategoryId)?.Name ?? "Unknown",
-                        brandMap.GetValueOrDefault(p.BrandId)?.Name ?? "Unknown"
-                    ))
-                    .ToList();
-            }
+            var categoryIds = GetSlotCategoryIds(slot.CategorySlug, categories);
+            var slotProducts = products
+                .Where(p => categoryIds.Contains(p.CategoryId))
+                .Select(p => new ProductListDto(
+                    p.Id,
+                    p.Name,
+                    p.Slug,
+                    p.Price,
+                    p.DiscountPrice,
+                    p.Images.FirstOrDefault(i => i.IsPrimary)?.ImageUrl ?? p.Images.FirstOrDefault()?.ImageUrl,
+                    p.Stock,
+                    p.IsFeatured,
+                    categoryMap.GetValueOrDefault(p.CategoryId)?.Name ?? "Unknown",
+                    brandMap.GetValueOrDefault(p.BrandId)?.Name ?? "Unknown"
+                ))
+                .ToList();
 
             result.Add(new { slot, products = slotProducts });
         }
 
         return Ok(result);
+    }
+
+    private static HashSet<int> GetSlotCategoryIds(string categorySlug, List<Category> categories)
+    {
+        var canonicalSlug = CanonicalizeCategory(categorySlug);
+        var categoryIds = categories
+            .Where(c => CanonicalizeCategory(c.Slug) == canonicalSlug || CanonicalizeCategory(c.Name) == canonicalSlug)
+            .Select(c => c.Id)
+            .ToHashSet();
+
+        var count = 0;
+        while (count != categoryIds.Count)
+        {
+            count = categoryIds.Count;
+            categoryIds.UnionWith(categories
+                .Where(c => c.ParentCategoryId.HasValue && categoryIds.Contains(c.ParentCategoryId.Value))
+                .Select(c => c.Id));
+        }
+
+        return categoryIds;
+    }
+
+    private static string CanonicalizeCategory(string value)
+    {
+        var normalized = Regex.Replace(value.Trim().ToLowerInvariant(), @"[^a-z0-9]+", "-").Trim('-');
+        return normalized switch
+        {
+            "hdd" or "hard-drive" or "hard-drives" => "storage",
+            "cables" or "network-cable" or "network-cables" or "network-cabling" => "cable",
+            _ => normalized
+        };
     }
 
     [HttpPost("save")]

@@ -107,24 +107,40 @@ public class ProductGroupsController : ControllerBase
         var products = await _db.Products.Find(p => p.IsActive).ToListAsync();
         var categories = await _db.Categories.Find(c => c.IsActive).ToListAsync();
         var brands = await _db.Brands.Find(b => b.IsActive).ToListAsync();
-        var weekStart = DateTime.UtcNow.AddDays(-7);
-        var recentOrders = await _db.Orders.Find(o =>
-            o.CreatedAt >= weekStart
-            && o.Status != OrderStatus.Cancelled
+        var orders = await _db.Orders.Find(o =>
+            o.Status != OrderStatus.Cancelled
             && o.PaymentStatus != PaymentStatus.Failed
             && o.PaymentStatus != PaymentStatus.Cancelled
-            && o.PaymentStatus != PaymentStatus.Refunded).ToListAsync();
+            && o.PaymentStatus != PaymentStatus.Refunded)
+            .Project(o => new { o.CreatedAt, o.Items, o.Packages })
+            .ToListAsync();
 
         var categoryMap = categories.ToDictionary(c => c.Id);
         var brandMap = brands.ToDictionary(b => b.Id);
         var productMap = products.ToDictionary(p => p.Id);
-        var latestPurchaseByProduct = recentOrders
+        var weekStart = DateTime.UtcNow.AddDays(-7);
+        var latestPurchaseByProduct = orders
+            .Where(order => order.CreatedAt >= weekStart)
             .SelectMany(order =>
                 order.Items.Select(item => new { item.ProductId, PurchaseDate = order.CreatedAt })
                     .Concat(order.Packages.SelectMany(package =>
                         package.Items.Select(item => new { item.ProductId, PurchaseDate = order.CreatedAt }))))
             .GroupBy(purchase => purchase.ProductId)
             .ToDictionary(group => group.Key, group => group.Max(purchase => purchase.PurchaseDate));
+        var packageSales = new Dictionary<int, int>();
+        var productSales = new Dictionary<int, int>();
+        foreach (var order in orders)
+        {
+            foreach (var item in order.Items)
+                productSales[item.ProductId] = productSales.GetValueOrDefault(item.ProductId) + item.Quantity;
+
+            foreach (var package in order.Packages)
+            {
+                packageSales[package.PackageId] = packageSales.GetValueOrDefault(package.PackageId) + package.Quantity;
+                foreach (var item in package.Items)
+                    productSales[item.ProductId] = productSales.GetValueOrDefault(item.ProductId) + item.Quantity * package.Quantity;
+            }
+        }
 
         List<ProductListDto> Build(string key) => groups
             .FirstOrDefault(g => g.Key == key)?.ProductIds
@@ -164,6 +180,18 @@ public class ProductGroupsController : ControllerBase
             p.Reviews.Count
         );
 
+        var featuredPackages = await _db.Packages.Find(p => p.IsActive && p.IsFeatured).ToListAsync();
+        var bestSellingPackages = featuredPackages
+            .OrderByDescending(p => packageSales.GetValueOrDefault(p.Id))
+            .ThenByDescending(p => p.CreatedAt)
+            .Take(5)
+            .ToList();
+        var bestSellingProducts = products
+            .OrderByDescending(p => productSales.GetValueOrDefault(p.Id))
+            .ThenByDescending(p => p.CreatedAt)
+            .Take(5)
+            .Select(ToProductDto)
+            .ToList();
         var featuredProducts = products.Where(p => p.IsFeatured);
         var otherProducts = products.Where(p => !p.IsFeatured);
         var newArrivals = featuredProducts.OrderByDescending(p => p.CreatedAt)
@@ -184,6 +212,8 @@ public class ProductGroupsController : ControllerBase
         return Ok(new
         {
             bestSellers = Build("best-sellers"),
+            bestSellingPackages = await PackageMapper.MapManyAsync(_db, bestSellingPackages),
+            bestSellingProducts,
             mostPopular,
             newArrivals
         });

@@ -117,6 +117,10 @@ public static class MongoDbInitializer
             new Category { Id = 13, Name = "Access Control", Slug = "access-control", DisplayOrder = 5 },
         };
         await UpsertMissingAsync(db.Categories, categories, c => c.Id);
+        await EnsureCategoryAsync(db.Categories, "Video Balloon", "video-balloon", 4, 4);
+        await EnsureCategoryAsync(db.Categories, "POE Switch", "poe-switch", 2, 1);
+        await EnsureCategoryAsync(db.Categories, "Desktop Switch", "desktop-switch", 2, 2);
+        await EnsureCategoryAsync(db.Categories, "Router", "router", 2, 3);
 
         // Ensure default category hierarchy & active status are restored
         await db.Categories.UpdateOneAsync(c => c.Id == 1, Builders<Category>.Update.Set(c => c.ParentCategoryId, (int?)null).Set(c => c.IsActive, true).Set(c => c.DisplayOrder, 1));
@@ -347,6 +351,38 @@ public static class MongoDbInitializer
         var missing = candidates.Where(c => !existingIds.Contains(idSelector(c))).ToList();
         if (missing.Count > 0)
             await collection.InsertManyAsync(missing);
+    }
+
+    private static async Task EnsureCategoryAsync(
+        IMongoCollection<Category> categories,
+        string name,
+        string slug,
+        int parentCategoryId,
+        int displayOrder)
+    {
+        var existing = await categories.Find(c => c.Slug == slug).FirstOrDefaultAsync();
+        var update = Builders<Category>.Update
+            .Set(c => c.Name, name)
+            .Set(c => c.ParentCategoryId, parentCategoryId)
+            .Set(c => c.IsActive, true)
+            .Set(c => c.DisplayOrder, displayOrder);
+
+        if (existing != null)
+        {
+            await categories.UpdateOneAsync(c => c.Id == existing.Id, update);
+            return;
+        }
+
+        var lastCategory = await categories.Find(_ => true).SortByDescending(c => c.Id).FirstOrDefaultAsync();
+        await categories.InsertOneAsync(new Category
+        {
+            Id = (lastCategory?.Id ?? 0) + 1,
+            Name = name,
+            Slug = slug,
+            ParentCategoryId = parentCategoryId,
+            IsActive = true,
+            DisplayOrder = displayOrder
+        });
     }
 
     private static async Task SyncCountersAsync(MongoDbContext db)

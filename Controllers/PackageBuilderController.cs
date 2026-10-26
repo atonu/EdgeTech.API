@@ -37,6 +37,11 @@ public class PackageBuilderController : ControllerBase
         new("cable", "Cable", "BNC/Network Cabling", "cable", "cable"),
         new("power", "Power Adapter", "Power Supply Unit", "power-adapter", "zap"),
         new("ups", "UPS", "Uninterruptible Power Supply", "ups", "battery"),
+        new("video-balloon", "Video Balloon", "Video balun and video transmission accessories", "video-balloon", "cable"),
+        new("poe-switch", "POE Switch", "Power over Ethernet switches", "poe-switch", "network"),
+        new("desktop-switch", "Desktop Switch", "Desktop network switches", "desktop-switch", "network"),
+        new("router", "Router", "Network routers", "router", "router"),
+        new("accessories", "Accessories", "CCTV and networking accessories", "accessories", "package"),
     ];
 
     [HttpGet("slots")]
@@ -102,6 +107,7 @@ public class PackageBuilderController : ControllerBase
         {
             "hdd" or "hard-drive" or "hard-drives" => "storage",
             "cables" or "network-cable" or "network-cables" or "network-cabling" => "cable",
+            "video-balun" or "video-baluns" => "video-balloon",
             _ => normalized
         };
     }

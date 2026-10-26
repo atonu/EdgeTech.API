@@ -21,6 +21,7 @@ public class HeroCarousel
 
     /// <summary>Milliseconds each slide stays on screen before auto-advancing.</summary>
     public int AutoplayMs { get; set; } = 6000;
+    public bool FlashSaleEnabled { get; set; }
 
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 }

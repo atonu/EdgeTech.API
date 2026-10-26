@@ -68,12 +68,43 @@ public class HeroCarouselController : ControllerBase
 
         if (carousel == null)
         {
-            carousel = new HeroCarousel { Slides = DefaultSlides(), UpdatedAt = DateTime.UtcNow };
+            carousel = new HeroCarousel
+            {
+                Slides = DefaultSlides(),
+                FlashSaleEnabled = false,
+                UpdatedAt = DateTime.UtcNow
+            };
             await _db.HeroCarousels.InsertOneAsync(carousel);
         }
 
         carousel.Slides = carousel.Slides.OrderBy(s => s.Order).ToList();
         return Ok(carousel);
+    }
+
+    [HttpPatch("flash-sale")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> UpdateFlashSale([FromBody] FlashSaleSettingRequest request)
+    {
+        var existing = await _db.HeroCarousels.Find(_ => true).FirstOrDefaultAsync();
+        if (existing == null)
+        {
+            existing = new HeroCarousel
+            {
+                Slides = DefaultSlides(),
+                FlashSaleEnabled = request.Enabled,
+                UpdatedAt = DateTime.UtcNow
+            };
+            await _db.HeroCarousels.InsertOneAsync(existing);
+            return Ok(existing);
+        }
+
+        var update = Builders<HeroCarousel>.Update
+            .Set(carousel => carousel.FlashSaleEnabled, request.Enabled)
+            .Set(carousel => carousel.UpdatedAt, DateTime.UtcNow);
+        await _db.HeroCarousels.UpdateOneAsync(carousel => carousel.Id == existing.Id, update);
+        existing.FlashSaleEnabled = request.Enabled;
+        existing.UpdatedAt = DateTime.UtcNow;
+        return Ok(existing);
     }
 
     [HttpPut]
@@ -108,6 +139,7 @@ public class HeroCarouselController : ControllerBase
             Id = existing?.Id ?? string.Empty,
             Slides = slides,
             AutoplayMs = request.AutoplayMs is >= 2000 and <= 30000 ? request.AutoplayMs : 6000,
+            FlashSaleEnabled = request.FlashSaleEnabled,
             UpdatedAt = DateTime.UtcNow
         };
 
@@ -122,4 +154,9 @@ public class HeroCarouselController : ControllerBase
 
         return Ok(updated);
     }
+}
+
+public class FlashSaleSettingRequest
+{
+    public bool Enabled { get; set; }
 }

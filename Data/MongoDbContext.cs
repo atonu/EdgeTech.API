@@ -52,4 +52,5 @@ public class MongoDbContext
     public IMongoCollection<PolicyPage> PolicyPages => Database.GetCollection<PolicyPage>("policyPages");
     public IMongoCollection<Feedback> Feedbacks => Database.GetCollection<Feedback>("feedbacks");
     public IMongoCollection<HeroCarousel> HeroCarousels => Database.GetCollection<HeroCarousel>("heroCarousel");
+    public IMongoCollection<HappyCustomer> HappyCustomers => Database.GetCollection<HappyCustomer>("happyCustomers");
 }

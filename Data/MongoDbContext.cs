@@ -31,7 +31,7 @@ public class MongoDbContext
             connectionString = "mongodb://localhost:27017";
         }
 
-        var databaseName = configuration["MongoDb:DatabaseName"] ?? Environment.GetEnvironmentVariable("MONGODB_DATABASE") ?? "EdgeTechDB";
+        var databaseName = configuration["MongoDb:DatabaseName"] ?? Environment.GetEnvironmentVariable("MONGODB_DATABASE") ?? "edgetechdb";
 
         var client = new MongoClient(connectionString);
         Database = client.GetDatabase(databaseName);

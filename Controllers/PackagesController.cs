@@ -78,7 +78,7 @@ public class AdminPackagesController : ControllerBase
             Name = req.Name,
             Description = req.Description,
             ImageUrl = req.ImageUrl,
-            IsActive = req.IsActive,
+            IsActive = req.IsActive ?? true,
             IsFeatured = req.IsFeatured,
             PackagePrice = req.PackagePrice,
             // Honour an admin-set regular price; fall back to the summed component prices.

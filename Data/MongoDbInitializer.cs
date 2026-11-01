@@ -113,10 +113,16 @@ public static class MongoDbInitializer
             new Category { Id = 9, Name = "HDD", Slug = "hdd", ParentCategoryId = 3, DisplayOrder = 1 },
             new Category { Id = 10, Name = "Power Adapter", Slug = "power-adapter", ParentCategoryId = 4, DisplayOrder = 1 },
             new Category { Id = 11, Name = "Cable", Slug = "cable", ParentCategoryId = 4, DisplayOrder = 2 },
-            new Category { Id = 12, Name = "UPS", Slug = "ups", ParentCategoryId = 4, DisplayOrder = 3 },
+            new Category { Id = 12, Name = "Power Backup", Slug = "power-backup", ParentCategoryId = 4, DisplayOrder = 3 },
             new Category { Id = 13, Name = "Access Control", Slug = "access-control", DisplayOrder = 5 },
         };
         await UpsertMissingAsync(db.Categories, categories, c => c.Id);
+        await db.Categories.UpdateOneAsync(c => c.Id == 12, Builders<Category>.Update
+            .Set(c => c.Name, "Power Backup")
+            .Set(c => c.Slug, "power-backup")
+            .Set(c => c.ParentCategoryId, 4)
+            .Set(c => c.IsActive, true)
+            .Set(c => c.DisplayOrder, 3));
         await EnsureCategoryAsync(db.Categories, "Video Balloon", "video-balloon", 4, 4);
         await EnsureCategoryAsync(db.Categories, "POE Switch", "poe-switch", 2, 1);
         await EnsureCategoryAsync(db.Categories, "Desktop Switch", "desktop-switch", 2, 2);
@@ -135,7 +141,6 @@ public static class MongoDbInitializer
         await db.Categories.UpdateOneAsync(c => c.Id == 4, Builders<Category>.Update.Set(c => c.ParentCategoryId, (int?)null).Set(c => c.IsActive, true).Set(c => c.DisplayOrder, 5));
         await db.Categories.UpdateOneAsync(c => c.Id == 10, Builders<Category>.Update.Set(c => c.ParentCategoryId, 4).Set(c => c.IsActive, true).Set(c => c.DisplayOrder, 1));
         await db.Categories.UpdateOneAsync(c => c.Id == 11, Builders<Category>.Update.Set(c => c.ParentCategoryId, 4).Set(c => c.IsActive, true).Set(c => c.DisplayOrder, 2));
-        await db.Categories.UpdateOneAsync(c => c.Id == 12, Builders<Category>.Update.Set(c => c.ParentCategoryId, 4).Set(c => c.IsActive, true).Set(c => c.DisplayOrder, 3));
 
         var products = new[]
         {

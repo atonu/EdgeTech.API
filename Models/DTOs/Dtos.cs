@@ -29,7 +29,8 @@ public record ProductListDto(
     int Id, string Name, string Slug, decimal Price, decimal? DiscountPrice,
     string? PrimaryImageUrl, int Stock, bool IsFeatured,
     string CategoryName, string BrandName,
-    double AverageRating = 0, int ReviewCount = 0
+    double AverageRating = 0, int ReviewCount = 0,
+    int CategoryId = 0, string CategorySlug = ""
 );
 public record CreateProductRequest(
     string Name, string? Description, string? ShortDescription,

@@ -24,20 +24,6 @@ public class CategoriesController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetAll([FromQuery] bool includeInactive = false)
     {
-        await _db.Categories.UpdateOneAsync(c => c.Id == 1, Builders<Category>.Update.Set(c => c.ParentCategoryId, (int?)null).Set(c => c.IsActive, true).Set(c => c.DisplayOrder, 1));
-        await _db.Categories.UpdateOneAsync(c => c.Id == 4, Builders<Category>.Update.Set(c => c.ParentCategoryId, (int?)null).Set(c => c.IsActive, true).Set(c => c.DisplayOrder, 2));
-        await _db.Categories.UpdateOneAsync(c => c.Id == 3, Builders<Category>.Update.Set(c => c.ParentCategoryId, (int?)null).Set(c => c.IsActive, true).Set(c => c.DisplayOrder, 3));
-        await _db.Categories.UpdateOneAsync(c => c.Id == 13, Builders<Category>.Update.Set(c => c.ParentCategoryId, (int?)null).Set(c => c.IsActive, true).Set(c => c.DisplayOrder, 4));
-        await _db.Categories.UpdateOneAsync(c => c.Id == 2, Builders<Category>.Update.Set(c => c.ParentCategoryId, (int?)null).Set(c => c.IsActive, true).Set(c => c.DisplayOrder, 5));
-        await _db.Categories.UpdateOneAsync(c => c.Id == 5, Builders<Category>.Update.Set(c => c.ParentCategoryId, 1).Set(c => c.IsActive, true).Set(c => c.DisplayOrder, 1));
-        await _db.Categories.UpdateOneAsync(c => c.Id == 6, Builders<Category>.Update.Set(c => c.ParentCategoryId, 1).Set(c => c.IsActive, true).Set(c => c.DisplayOrder, 2));
-        await _db.Categories.UpdateOneAsync(c => c.Id == 7, Builders<Category>.Update.Set(c => c.ParentCategoryId, 1).Set(c => c.IsActive, true).Set(c => c.DisplayOrder, 3));
-        await _db.Categories.UpdateOneAsync(c => c.Id == 8, Builders<Category>.Update.Set(c => c.ParentCategoryId, 1).Set(c => c.IsActive, true).Set(c => c.DisplayOrder, 4));
-        await _db.Categories.UpdateOneAsync(c => c.Id == 9, Builders<Category>.Update.Set(c => c.ParentCategoryId, 3).Set(c => c.IsActive, true).Set(c => c.DisplayOrder, 1));
-        await _db.Categories.UpdateOneAsync(c => c.Id == 10, Builders<Category>.Update.Set(c => c.ParentCategoryId, 4).Set(c => c.IsActive, true).Set(c => c.DisplayOrder, 1));
-        await _db.Categories.UpdateOneAsync(c => c.Id == 11, Builders<Category>.Update.Set(c => c.ParentCategoryId, 4).Set(c => c.IsActive, true).Set(c => c.DisplayOrder, 2));
-        await _db.Categories.UpdateOneAsync(c => c.Id == 12, Builders<Category>.Update.Set(c => c.ParentCategoryId, 4).Set(c => c.IsActive, true).Set(c => c.DisplayOrder, 3));
-
         var categories = includeInactive
             ? await _db.Categories.Find(_ => true).SortBy(c => c.DisplayOrder).ToListAsync()
             : await _db.Categories.Find(c => c.IsActive).SortBy(c => c.DisplayOrder).ToListAsync();

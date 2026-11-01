@@ -85,7 +85,9 @@ public class RecentlyViewedController : ControllerBase
                     product.Stock,
                     product.IsFeatured,
                     categoryMap.GetValueOrDefault(product.CategoryId)?.Name ?? "Unknown",
-                    brandMap.GetValueOrDefault(product.BrandId)?.Name ?? "Unknown"
+                    brandMap.GetValueOrDefault(product.BrandId)?.Name ?? "Unknown",
+                    CategoryId: product.CategoryId,
+                    CategorySlug: categoryMap.GetValueOrDefault(product.CategoryId)?.Slug ?? string.Empty
                 );
             })
             .ToList();

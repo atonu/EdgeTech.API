@@ -160,7 +160,9 @@ public class ProductGroupsController : ControllerBase
                     categoryMap.GetValueOrDefault(p.CategoryId)?.Name ?? "Unknown",
                     brandMap.GetValueOrDefault(p.BrandId)?.Name ?? "Unknown",
                     p.Reviews.Any() ? Math.Round(p.Reviews.Average(r => r.Rating), 1) : 0,
-                    p.Reviews.Count
+                    p.Reviews.Count,
+                    p.CategoryId,
+                    categoryMap.GetValueOrDefault(p.CategoryId)?.Slug ?? string.Empty
                 );
             })
             .ToList() ?? [];
@@ -177,7 +179,9 @@ public class ProductGroupsController : ControllerBase
             categoryMap.GetValueOrDefault(p.CategoryId)?.Name ?? "Unknown",
             brandMap.GetValueOrDefault(p.BrandId)?.Name ?? "Unknown",
             p.Reviews.Any() ? Math.Round(p.Reviews.Average(r => r.Rating), 1) : 0,
-            p.Reviews.Count
+            p.Reviews.Count,
+            p.CategoryId,
+            categoryMap.GetValueOrDefault(p.CategoryId)?.Slug ?? string.Empty
         );
 
         var featuredPackages = await _db.Packages.Find(p => p.IsActive && p.IsFeatured).ToListAsync();

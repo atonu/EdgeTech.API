@@ -36,11 +36,8 @@ public class PackageBuilderController : ControllerBase
         new("storage", "Storage", "Surveillance HDD for recording storage", "storage", "hard-drive"),
         new("cable", "Cable", "BNC/Network Cabling", "cable", "cable"),
         new("power", "Power Adapter", "Power Supply Unit", "power-adapter", "zap"),
-        new("ups", "UPS", "Uninterruptible Power Supply", "ups", "battery"),
-        new("video-balloon", "Video Balloon", "Video balun and video transmission accessories", "video-balloon", "cable"),
-        new("poe-switch", "POE Switch", "Power over Ethernet switches", "poe-switch", "network"),
-        new("desktop-switch", "Desktop Switch", "Desktop network switches", "desktop-switch", "network"),
-        new("router", "Router", "Network routers", "router", "router"),
+        new("power-backup", "Power Backup", "Uninterruptible power supply and backup", "power-backup", "battery"),
+        new("networking", "Networking", "Networking products, switches, and routers", "networking", "network"),
         new("accessories", "Accessories", "CCTV and networking accessories", "accessories", "package"),
     ];
 
@@ -70,7 +67,9 @@ public class PackageBuilderController : ControllerBase
                     p.Stock,
                     p.IsFeatured,
                     categoryMap.GetValueOrDefault(p.CategoryId)?.Name ?? "Unknown",
-                    brandMap.GetValueOrDefault(p.BrandId)?.Name ?? "Unknown"
+                    brandMap.GetValueOrDefault(p.BrandId)?.Name ?? "Unknown",
+                    CategoryId: p.CategoryId,
+                    CategorySlug: categoryMap.GetValueOrDefault(p.CategoryId)?.Slug ?? string.Empty
                 ))
                 .ToList();
 

@@ -26,6 +26,7 @@ public class ProductsController : ControllerBase
     public async Task<IActionResult> GetAll(
         [FromQuery] string? search,
         [FromQuery] string? category,
+        [FromQuery] string? subcategory,
         [FromQuery] string? brand,
         [FromQuery] bool? featured,
         [FromQuery] decimal? minPrice,
@@ -40,18 +41,12 @@ public class ProductsController : ControllerBase
         var categories = await _db.Categories.Find(_ => true).ToListAsync();
         var brands = await _db.Brands.Find(_ => true).ToListAsync();
 
-        var categorySlugToIds = categories
-            .GroupBy(c => c.Slug)
-            .ToDictionary(g => g.Key, g => g.Select(c => c.Id).ToHashSet());
-
-        if (!string.IsNullOrEmpty(category))
-        {
-            var matching = categories.Where(c => c.Slug == category).Select(c => c.Id).ToHashSet();
-            var parentIds = categories.Where(c => c.Slug == category).Select(c => c.Id).ToHashSet();
-            foreach (var sub in categories.Where(c => c.ParentCategoryId.HasValue && parentIds.Contains(c.ParentCategoryId.Value)))
-                matching.Add(sub.Id);
-            categorySlugToIds[category] = matching;
-        }
+        HashSet<int>? categoryIds = string.IsNullOrEmpty(category)
+            ? null
+            : GetCategoryAndDescendantIds(category, categories);
+        HashSet<int>? subcategoryIds = string.IsNullOrEmpty(subcategory)
+            ? null
+            : GetCategoryAndDescendantIds(subcategory, categories);
 
         var brandIds = string.IsNullOrEmpty(brand)
             ? null
@@ -67,8 +62,11 @@ public class ProductsController : ControllerBase
             query = query.Where(p => p.Name.ToLowerInvariant().Contains(term) || (p.Description ?? string.Empty).ToLowerInvariant().Contains(term));
         }
 
-        if (!string.IsNullOrEmpty(category) && categorySlugToIds.TryGetValue(category, out var categoryIds))
+        if (categoryIds != null)
             query = query.Where(p => categoryIds.Contains(p.CategoryId));
+
+        if (subcategoryIds != null)
+            query = query.Where(p => subcategoryIds.Contains(p.CategoryId));
 
         if (brandIds != null && brandIds.Count > 0)
             query = query.Where(p => brandIds.Contains(p.BrandId));
@@ -411,8 +409,27 @@ public class ProductsController : ControllerBase
         categoryMap.GetValueOrDefault(p.CategoryId)?.Name ?? "Unknown",
         brandMap.GetValueOrDefault(p.BrandId)?.Name ?? "Unknown",
         p.Reviews.Any() ? Math.Round(p.Reviews.Average(r => r.Rating), 1) : 0,
-        p.Reviews.Count
+        p.Reviews.Count,
+        p.CategoryId,
+        categoryMap.GetValueOrDefault(p.CategoryId)?.Slug ?? string.Empty
     );
+
+    private static HashSet<int> GetCategoryAndDescendantIds(string slug, List<Category> categories)
+    {
+        var ids = categories.Where(c => c.Slug == slug).Select(c => c.Id).ToHashSet();
+        var parentIds = new HashSet<int>(ids);
+        while (parentIds.Count > 0)
+        {
+            var children = categories
+                .Where(c => c.ParentCategoryId.HasValue && parentIds.Contains(c.ParentCategoryId.Value))
+                .Select(c => c.Id)
+                .Where(ids.Add)
+                .ToHashSet();
+            parentIds = children;
+        }
+
+        return ids;
+    }
 
     private static ProductDto MapToDto(Product p, Category? category, Brand? brand) => new(
         p.Id, p.Name, p.Slug, p.Description, p.ShortDescription,

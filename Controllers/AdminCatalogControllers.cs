@@ -23,14 +23,36 @@ public class ServicesController : ControllerBase
     public async Task<IActionResult> GetAll()
     {
         var services = await _db.Services.Find(s => s.IsActive)
-            .SortBy(s => s.Name)
+            .SortBy(s => s.DisplayOrder)
+            .ThenBy(s => s.CreatedAt)
+            .ThenBy(s => s.Id)
             .ToListAsync();
 
-        return Ok(services.Select(MapService));
+        return Ok(MapServices(services));
     }
 
-    private static ServiceItemDto MapService(ServiceItem s) =>
-        new(s.Id, s.Name, s.Images, s.Price, s.ShortDescription, s.Description, s.IsPerUnit, s.IsActive);
+    internal static List<ServiceItemDto> MapServices(List<ServiceItem> services)
+    {
+        var displayOrders = services
+            .Where(s => s.DisplayOrder > 0)
+            .ToDictionary(s => s.Id, s => s.DisplayOrder);
+        var usedOrders = displayOrders.Values.ToHashSet();
+        var nextOrder = 1;
+
+        foreach (var service in services.Where(s => s.DisplayOrder <= 0).OrderBy(s => s.CreatedAt).ThenBy(s => s.Id))
+        {
+            while (usedOrders.Contains(nextOrder)) nextOrder++;
+            displayOrders[service.Id] = nextOrder;
+            usedOrders.Add(nextOrder++);
+        }
+
+        return services
+            .OrderBy(s => displayOrders[s.Id])
+            .ThenBy(s => s.Id)
+            .Select(s => new ServiceItemDto(
+                s.Id, s.Name, s.Images, s.Price, s.ShortDescription, s.Description, s.IsPerUnit, s.IsActive, displayOrders[s.Id]))
+            .ToList();
+    }
 }
 
 [ApiController]
@@ -50,14 +72,20 @@ public class AdminServicesController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetAll()
     {
-        var services = await _db.Services.Find(_ => true).SortBy(s => s.Name).ToListAsync();
-        return Ok(services.Select(s => new ServiceItemDto(s.Id, s.Name, s.Images, s.Price, s.ShortDescription, s.Description, s.IsPerUnit, s.IsActive)));
+        var services = await _db.Services.Find(_ => true)
+            .SortBy(s => s.DisplayOrder)
+            .ThenBy(s => s.CreatedAt)
+            .ThenBy(s => s.Id)
+            .ToListAsync();
+        return Ok(ServicesController.MapServices(services));
     }
 
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateServiceItemRequest req)
     {
         if (req.Price < 0) return BadRequest(new { message = "Price cannot be negative." });
+        if (req.DisplayOrder < 0) return BadRequest(new { message = "Display order cannot be negative." });
+        var existingServices = await _db.Services.Find(_ => true).ToListAsync();
         var item = new ServiceItem
         {
             Id = await _ids.NextAsync("services"),
@@ -68,17 +96,21 @@ public class AdminServicesController : ControllerBase
             Description = req.Description,
             IsPerUnit = req.IsPerUnit,
             IsActive = req.IsActive,
+            DisplayOrder = req.DisplayOrder > 0
+                ? req.DisplayOrder
+                : Math.Max(existingServices.Count, existingServices.Select(s => s.DisplayOrder).DefaultIfEmpty(0).Max()) + 1,
             CreatedAt = DateTime.UtcNow
         };
 
         await _db.Services.InsertOneAsync(item);
-        return Ok(new ServiceItemDto(item.Id, item.Name, item.Images, item.Price, item.ShortDescription, item.Description, item.IsPerUnit, item.IsActive));
+        return Ok(new ServiceItemDto(item.Id, item.Name, item.Images, item.Price, item.ShortDescription, item.Description, item.IsPerUnit, item.IsActive, item.DisplayOrder));
     }
 
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(int id, [FromBody] UpdateServiceItemRequest req)
     {
         if (req.Price < 0) return BadRequest(new { message = "Price cannot be negative." });
+        if (req.DisplayOrder < 0) return BadRequest(new { message = "Display order cannot be negative." });
         var update = Builders<ServiceItem>.Update
             .Set(s => s.Name, req.Name.Trim())
             .Set(s => s.Images, req.Images ?? [])
@@ -86,7 +118,8 @@ public class AdminServicesController : ControllerBase
             .Set(s => s.ShortDescription, req.ShortDescription)
             .Set(s => s.Description, req.Description)
             .Set(s => s.IsPerUnit, req.IsPerUnit)
-            .Set(s => s.IsActive, req.IsActive);
+            .Set(s => s.IsActive, req.IsActive)
+            .Set(s => s.DisplayOrder, req.DisplayOrder);
 
         var result = await _db.Services.UpdateOneAsync(s => s.Id == id, update);
         if (result.MatchedCount == 0) return NotFound();

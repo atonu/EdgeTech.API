@@ -154,15 +154,15 @@ public record PagedResult<T>(List<T> Items, int TotalCount, int Page, int PageSi
 // Services
 public record ServiceItemDto(
     int Id, string Name, List<string> Images, decimal Price, string? ShortDescription,
-    string? Description, bool IsPerUnit, bool IsActive
+    string? Description, bool IsPerUnit, bool IsActive, int DisplayOrder
 );
 public record CreateServiceItemRequest(
     string Name, string? Description, List<string>? Images = null, decimal Price = 0,
-    string? ShortDescription = null, bool IsPerUnit = false, bool IsActive = true
+    string? ShortDescription = null, bool IsPerUnit = false, bool IsActive = true, int DisplayOrder = 0
 );
 public record UpdateServiceItemRequest(
     string Name, string? Description, bool IsActive, List<string>? Images = null,
-    decimal Price = 0, string? ShortDescription = null, bool IsPerUnit = false
+    decimal Price = 0, string? ShortDescription = null, bool IsPerUnit = false, int DisplayOrder = 0
 );
 
 // Product groups

@@ -36,6 +36,9 @@ public class OrdersController : ControllerBase
         var packageRequests = (req.Packages ?? [])
             .Where(p => p.Quantity > 0)
             .ToList();
+        var serviceRequests = (req.Services ?? [])
+            .Where(s => s.Quantity > 0)
+            .ToList();
 
         List<CartItem> cartItems;
         if (req.Items != null && req.Items.Count > 0)
@@ -45,9 +48,9 @@ public class OrdersController : ControllerBase
                 .Select(i => new CartItem { ProductId = i.ProductId, Quantity = i.Quantity, UserId = userId ?? "guest" })
                 .ToList();
         }
-        else if (userId != null && packageRequests.Count == 0)
+        else if (userId != null && packageRequests.Count == 0 && serviceRequests.Count == 0)
         {
-            // Only fall back to the persisted server cart when the client sent neither items nor packages.
+            // Only fall back to the persisted server cart when the client sent no explicit order lines.
             cartItems = await _db.CartItems.Find(ci => ci.UserId == userId).ToListAsync();
         }
         else
@@ -55,8 +58,22 @@ public class OrdersController : ControllerBase
             cartItems = [];
         }
 
-        if (!cartItems.Any() && packageRequests.Count == 0)
+        if (!cartItems.Any() && packageRequests.Count == 0 && serviceRequests.Count == 0)
             return BadRequest(new { message = "Cart is empty" });
+
+        if ((req.Services ?? []).Any(s => s.Quantity < 1 || s.Quantity > 10000))
+            return BadRequest(new { message = "Service quantity must be between 1 and 10,000." });
+
+        var serviceIds = serviceRequests.Select(s => s.ServiceId).Distinct().ToList();
+        var services = await _db.Services.Find(s => serviceIds.Contains(s.Id)).ToListAsync();
+        var serviceMap = services.ToDictionary(s => s.Id);
+        foreach (var serviceRequest in serviceRequests)
+        {
+            if (!serviceMap.TryGetValue(serviceRequest.ServiceId, out var service) || !service.IsActive)
+                return BadRequest(new { message = $"Service #{serviceRequest.ServiceId} is no longer available." });
+            if (service.Price < 0)
+                return BadRequest(new { message = $"Service {service.Name} has an invalid price." });
+        }
 
         // Resolve and validate the selected bundle packages.
         var packageIds = packageRequests.Select(p => p.PackageId).Distinct().ToList();
@@ -104,7 +121,13 @@ public class OrdersController : ControllerBase
         var orderNumber = $"ET-{orderId:D6}";
         var standaloneTotal = cartItems.Sum(ci => (productMap[ci.ProductId].DiscountPrice ?? productMap[ci.ProductId].Price) * ci.Quantity);
         var packagesTotal = packageRequests.Sum(pr => packageMap[pr.PackageId].PackagePrice * pr.Quantity);
-        var totalAmount = standaloneTotal + packagesTotal;
+        var servicesTotal = serviceRequests.Sum(sr =>
+        {
+            var service = serviceMap[sr.ServiceId];
+            var quantity = service.IsPerUnit ? sr.Quantity : 1;
+            return service.Price * quantity;
+        });
+        var totalAmount = standaloneTotal + packagesTotal + servicesTotal;
         var isEmi = req.IsEmi || (req.PaymentMethod != null && req.PaymentMethod.Equals("emi", StringComparison.OrdinalIgnoreCase));
         var tenureMonths = req.EmiTenureMonths ?? (isEmi ? 12 : null);
         var monthlyAmount = isEmi && tenureMonths.HasValue && tenureMonths.Value > 0
@@ -142,7 +165,8 @@ public class OrdersController : ControllerBase
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow,
             Items = [],
-            Packages = []
+            Packages = [],
+            Services = []
         };
 
         foreach (var ci in cartItems)
@@ -179,6 +203,20 @@ public class OrdersController : ControllerBase
             });
         }
 
+        foreach (var sr in serviceRequests)
+        {
+            var service = serviceMap[sr.ServiceId];
+            order.Services.Add(new OrderService
+            {
+                ServiceId = service.Id,
+                Name = service.Name,
+                ImageUrl = service.Images.FirstOrDefault(),
+                UnitPrice = service.Price,
+                Quantity = service.IsPerUnit ? sr.Quantity : 1,
+                IsPerUnit = service.IsPerUnit
+            });
+        }
+
         // Decrement stock once per product using the aggregated totals.
         foreach (var (productId, quantity) in requiredQuantities)
         {
@@ -203,7 +241,7 @@ public class OrdersController : ControllerBase
             });
         }
 
-        if (userId != null)
+        if (userId != null && (cartItems.Count > 0 || packageRequests.Count > 0))
             await _db.CartItems.DeleteManyAsync(ci => ci.UserId == userId);
 
         return Ok(new { orderId = order.Id, orderNumber = order.OrderNumber });
@@ -445,6 +483,14 @@ public class OrdersController : ControllerBase
                         pi.Quantity,
                         pi.UnitPrice
                     )).ToList()
+                )).ToList(),
+                o.Services.Select(service => new OrderServiceDto(
+                    service.ServiceId,
+                    service.Name,
+                    service.ImageUrl,
+                    service.UnitPrice,
+                    service.Quantity,
+                    service.IsPerUnit
                 )).ToList()
             );
         }).ToList();

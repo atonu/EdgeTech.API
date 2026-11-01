@@ -80,8 +80,10 @@ public record PlaceOrderRequest(
     string? Fbp = null,
     string? Fbc = null,
     string? GaClientId = null,
-    string? Gclid = null
+    string? Gclid = null,
+    List<PlaceOrderServiceRequest>? Services = null
 );
+public record PlaceOrderServiceRequest(int ServiceId, int Quantity);
 public record VerifyPaymentRequest(
     string PaymentMethod,
     string? TransactionId,
@@ -108,7 +110,8 @@ public record OrderDto(
     int EmiCompletedMonths = 0,
     decimal? EmiMonthlyAmount = null,
     string? EmiBank = null,
-    List<OrderPackageDto>? Packages = null
+    List<OrderPackageDto>? Packages = null,
+    List<OrderServiceDto>? Services = null
 );
 public record OrderItemDto(int Id, int ProductId, string ProductName, string? ImageUrl, decimal UnitPrice, int Quantity);
 public record UpdateOrderStatusRequest(OrderStatus Status);
@@ -143,14 +146,24 @@ public record UpdatePackageRequest(string Name, string? Description, string? Ima
 public record PlaceOrderPackageRequest(int PackageId, int Quantity);
 public record OrderPackageItemDto(int ProductId, string ProductName, string? ImageUrl, int Quantity, decimal UnitPrice);
 public record OrderPackageDto(int PackageId, string Name, decimal RegularPrice, decimal PackagePrice, int Quantity, List<OrderPackageItemDto> Items);
+public record OrderServiceDto(int ServiceId, string Name, string? ImageUrl, decimal UnitPrice, int Quantity, bool IsPerUnit);
 
 // Pagination
 public record PagedResult<T>(List<T> Items, int TotalCount, int Page, int PageSize, int TotalPages);
 
 // Services
-public record ServiceItemDto(int Id, string Name, string? Description, bool IsActive);
-public record CreateServiceItemRequest(string Name, string? Description);
-public record UpdateServiceItemRequest(string Name, string? Description, bool IsActive);
+public record ServiceItemDto(
+    int Id, string Name, List<string> Images, decimal Price, string? ShortDescription,
+    string? Description, bool IsPerUnit, bool IsActive
+);
+public record CreateServiceItemRequest(
+    string Name, string? Description, List<string>? Images = null, decimal Price = 0,
+    string? ShortDescription = null, bool IsPerUnit = false, bool IsActive = true
+);
+public record UpdateServiceItemRequest(
+    string Name, string? Description, bool IsActive, List<string>? Images = null,
+    decimal Price = 0, string? ShortDescription = null, bool IsPerUnit = false
+);
 
 // Product groups
 public record ProductGroupDto(int Id, string Key, string Name, bool IsActive, List<int> ProductIds, DateTime UpdatedAt);

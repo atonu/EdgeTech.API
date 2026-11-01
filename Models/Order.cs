@@ -43,10 +43,21 @@ public class Order
     // Navigation
     public ApplicationUser? User { get; set; }
     public ICollection<OrderItem> Items { get; set; } = [];
+    public List<OrderService> Services { get; set; } = [];
 
     // Bundle lines. Component products are decremented from stock like standalone items, but they
     // are billed as a single unit at PackagePrice — recorded here so admins see the applied discount.
     public List<OrderPackage> Packages { get; set; } = [];
+}
+
+public class OrderService
+{
+    public int ServiceId { get; set; }
+    public string Name { get; set; } = string.Empty;
+    public string? ImageUrl { get; set; }
+    public decimal UnitPrice { get; set; }
+    public int Quantity { get; set; } = 1;
+    public bool IsPerUnit { get; set; }
 }
 
 // A package line captured on an order at the price it was sold for.

@@ -26,8 +26,11 @@ public class ServicesController : ControllerBase
             .SortBy(s => s.Name)
             .ToListAsync();
 
-        return Ok(services.Select(s => new ServiceItemDto(s.Id, s.Name, s.Description, s.IsActive)));
+        return Ok(services.Select(MapService));
     }
+
+    private static ServiceItemDto MapService(ServiceItem s) =>
+        new(s.Id, s.Name, s.Images, s.Price, s.ShortDescription, s.Description, s.IsPerUnit, s.IsActive);
 }
 
 [ApiController]
@@ -48,31 +51,41 @@ public class AdminServicesController : ControllerBase
     public async Task<IActionResult> GetAll()
     {
         var services = await _db.Services.Find(_ => true).SortBy(s => s.Name).ToListAsync();
-        return Ok(services.Select(s => new ServiceItemDto(s.Id, s.Name, s.Description, s.IsActive)));
+        return Ok(services.Select(s => new ServiceItemDto(s.Id, s.Name, s.Images, s.Price, s.ShortDescription, s.Description, s.IsPerUnit, s.IsActive)));
     }
 
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateServiceItemRequest req)
     {
+        if (req.Price < 0) return BadRequest(new { message = "Price cannot be negative." });
         var item = new ServiceItem
         {
             Id = await _ids.NextAsync("services"),
-            Name = req.Name,
+            Name = req.Name.Trim(),
+            Images = req.Images ?? [],
+            Price = req.Price,
+            ShortDescription = req.ShortDescription,
             Description = req.Description,
-            IsActive = true,
+            IsPerUnit = req.IsPerUnit,
+            IsActive = req.IsActive,
             CreatedAt = DateTime.UtcNow
         };
 
         await _db.Services.InsertOneAsync(item);
-        return Ok(new ServiceItemDto(item.Id, item.Name, item.Description, item.IsActive));
+        return Ok(new ServiceItemDto(item.Id, item.Name, item.Images, item.Price, item.ShortDescription, item.Description, item.IsPerUnit, item.IsActive));
     }
 
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(int id, [FromBody] UpdateServiceItemRequest req)
     {
+        if (req.Price < 0) return BadRequest(new { message = "Price cannot be negative." });
         var update = Builders<ServiceItem>.Update
-            .Set(s => s.Name, req.Name)
+            .Set(s => s.Name, req.Name.Trim())
+            .Set(s => s.Images, req.Images ?? [])
+            .Set(s => s.Price, req.Price)
+            .Set(s => s.ShortDescription, req.ShortDescription)
             .Set(s => s.Description, req.Description)
+            .Set(s => s.IsPerUnit, req.IsPerUnit)
             .Set(s => s.IsActive, req.IsActive);
 
         var result = await _db.Services.UpdateOneAsync(s => s.Id == id, update);

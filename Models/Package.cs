@@ -13,7 +13,7 @@ public class Package
     public string? ImageUrl { get; set; }
     public bool IsActive { get; set; } = true;
 
-    // When true the package is surfaced in the storefront "Best Selling" row alongside products.
+    // When true the package is surfaced in the featured homepage package section.
     public bool IsFeatured { get; set; }
 
     // RegularPrice is a snapshot of the components' individual prices at save time (sum of discount ?? price).
